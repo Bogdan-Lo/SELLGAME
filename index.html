@@ -3729,5 +3729,224 @@ generateSecondhandMarket(true);
 resetStealGame();
 updateUI();
 </script>
+<!-- ПОДКЛЮЧЕНИЕ МУЛЬТИПЛЕЕРА SOCKET.IO -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function initMultiplayer() {
+  if (typeof io === 'undefined') {
+    console.warn('Игра запущена локально без сервера (одиночный режим).');
+    return;
+  }
+
+  const socket = io();
+  let liveOnlinePlayers = [];
+
+  // 1. Регулярная отправка своего профиля на сервер
+  function syncMyProfileToServer() {
+    socket.emit('player_sync', {
+      playerId: state.playerId,
+      nickname: state.nickname,
+      level: state.level,
+      networth: getNetWorth()
+    });
+  }
+
+  socket.on('connect', () => {
+    showToast('🌐 Подключено к онлайн-серверу! Вы в сети.');
+    syncMyProfileToServer();
+  });
+
+  setInterval(syncMyProfileToServer, 4000);
+
+  // 2. Получение глобальных уведомлений сервера
+  socket.on('server_broadcast', (msg) => {
+    showToast(msg);
+  });
+
+  // 3. Обновление списка реальных игроков онлайн (Forbes + вкладка Друзья)
+  socket.on('online_players_update', (playersList) => {
+    liveOnlinePlayers = playersList.filter(p => p.id !== state.playerId);
+
+    // Добавляем реальных игроков в список онлайн в профиле
+    ONLINE_PLAYERS.length = 0;
+    liveOnlinePlayers.forEach(p => ONLINE_PLAYERS.push(p));
+
+    // Добавляем реальных игроков в таблицу Forbes
+    liveOnlinePlayers.forEach(p => {
+      const existing = RIVAL_BOTS.find(b => b.id === p.id);
+      if (existing) {
+        existing.name = p.name;
+        existing.lvl = p.lvl;
+        existing.nw = p.nw;
+      } else {
+        RIVAL_BOTS.push({ name: p.name + ' (Онлайн)', id: p.id, lvl: p.lvl, nw: p.nw });
+      }
+    });
+
+    if (document.getElementById('tab-clan').classList.contains('active')) renderClanAndForbes();
+    if (document.getElementById('tab-profile').classList.contains('active')) renderProfileTab();
+  });
+
+  // 4. Синхронизация общих лотов Аукциона от живых игроков
+  socket.on('shared_auction_sync', (serverLots) => {
+    serverLots.forEach(sLot => {
+      if (sLot.sellerId === state.playerId) return; // Свои лоты уже в верхнем блоке
+      const exists = auctionLots.some(l => l.plate && l.plate.uid === sLot.uid);
+      if (!exists) {
+        auctionLots.unshift({
+          plate: sLot.plate,
+          askPrice: sLot.askPrice,
+          minBid: sLot.minBid,
+          selectedBid: sLot.minBid,
+          seller: `🟢 ${sLot.sellerName} (ID:${sLot.sellerId})`,
+          isRealPlayerLot: true,
+          lotUid: sLot.uid
+        });
+      }
+    });
+    if (document.getElementById('tab-auction').classList.contains('active')) renderAuction();
+  });
+
+  // Уведомление продавцу, когда его лот купил реальный игрок
+  socket.on('your_auction_lot_sold', ({ uid, plateStr, paidPrice, buyerName }) => {
+    const idx = state.myAuctionListings.findIndex(x => x.uid === uid);
+    if (idx !== -1) {
+      state.myAuctionListings.splice(idx, 1);
+      state.money += paidPrice;
+      state.auctionSoldCount++;
+      addXp(35);
+      showToast(`🎉 Игрок ${buyerName} купил ваш лот [${plateStr}] на аукционе за ${fmt(paidPrice)}!`);
+      renderAuction();
+      updateUI();
+      saveGame();
+    }
+  });
+
+  // Перехват выставления лота на аукцион, чтобы отправить его всем игрокам
+  const origConfirmAuction = window.confirmListPlateOnAuction;
+  window.confirmListPlateOnAuction = function() {
+    origConfirmAuction();
+    const latestLot = state.myAuctionListings[state.myAuctionListings.length - 1];
+    if (latestLot) {
+      socket.emit('auction_list_lot', {
+        uid: latestLot.uid,
+        plate: latestLot.plate,
+        plateStr: formatPlateString(latestLot.plate),
+        askPrice: latestLot.askPrice,
+        minBid: Math.round(latestLot.askPrice * 0.7),
+        sellerName: state.nickname,
+        sellerId: state.playerId
+      });
+    }
+  };
+
+  // Перехват покупки лота на аукционе
+  const origBuyAuction = window.buyAuctionLot;
+  window.buyAuctionLot = function(idx) {
+    const lot = auctionLots[idx];
+    if (lot && lot.isRealPlayerLot && state.money >= lot.askPrice && state.inventory.length < getMaxInventory()) {
+      socket.emit('auction_buy_lot', {
+        lotUid: lot.lotUid,
+        buyerId: state.playerId,
+        buyerName: state.nickname,
+        paidPrice: lot.askPrice
+      });
+    }
+    origBuyAuction(idx);
+  };
+
+  // 5. Прямая P2P-торговля между реальными игроками по ID
+  const origSendTrade = window.sendPlayerTradeOffer;
+  window.sendPlayerTradeOffer = function() {
+    const targetId = document.getElementById('trade-target-id').value.trim();
+    const isRealOnline = liveOnlinePlayers.some(p => p.id === targetId);
+    if (isRealOnline) {
+      const uid = document.getElementById('trade-plate-select').value;
+      const p = state.inventory.find(x => x.uid === uid);
+      if (!p) return;
+      const pct = parseFloat(document.getElementById('trade-markup-slider').value) || 0;
+      const askPrice = Math.round(p.price * (1 + pct / 100));
+      socket.emit('p2p_trade_offer', {
+        targetId,
+        fromId: state.playerId,
+        fromName: state.nickname,
+        plate: p,
+        askPrice,
+        markupPct: pct
+      });
+      showToast(`📨 Предложение отправлено реальному игроку ID:${targetId}! Ожидайте его ответа.`);
+    } else {
+      origSendTrade();
+    }
+  };
+
+  // Получение живого P2P-предложения от другого игрока
+  socket.on('p2p_incoming_offer', ({ fromId, fromName, plate, askPrice, markupPct }) => {
+    const pStr = formatPlateString(plate);
+    if (confirm(`🤝 ВХОДЯЩАЯ СДЕЛКА ОТ ИГРОКА!\n\nИгрок ${fromName} (ID: ${fromId}) предлагает вам купить номер [${pStr}] за ${fmt(askPrice)} (Наценка: +${fmtPct(markupPct)}).\n\nКупить этот номер?`)) {
+      if (state.money < askPrice) {
+        showToast('❌ У вас недостаточно чистых денег для покупки!');
+        return;
+      }
+      state.money -= askPrice;
+      state.inventory.unshift(plate);
+      updateUI();
+      saveGame();
+      socket.emit('p2p_trade_accept', {
+        sellerId: fromId,
+        buyerId: state.playerId,
+        buyerName: state.nickname,
+        plate,
+        price: askPrice
+      });
+      showToast(`🎉 Вы купили номер [${pStr}] у игрока ${fromName}!`);
+    }
+  });
+
+  // Завершение сделки у продавца
+  socket.on('p2p_offer_accepted_by_buyer', ({ buyerName, plateUid, plateStr, price }) => {
+    const idx = state.inventory.findIndex(x => x.uid === plateUid);
+    if (idx !== -1) {
+      state.inventory.splice(idx, 1);
+      state.money += price;
+      state.tradesCompleted++;
+      addXp(35);
+      showToast(`💰 Игрок ${buyerName} принял ваше предложение и купил [${plateStr}] за ${fmt(price)}!`);
+      renderTradeTab();
+      updateUI();
+      saveGame();
+    }
+  });
+
+  // 6. Приглашение реального игрока в клан по ID
+  const origInviteClan = window.invitePlayerToClanById;
+  window.invitePlayerToClanById = function() {
+    const idVal = document.getElementById('clan-invite-id-inp')?.value.trim();
+    if (idVal && state.clan) {
+      socket.emit('clan_invite_send', {
+        targetId: idVal,
+        fromName: state.nickname,
+        clanTag: state.clan.tag,
+        clanName: state.clan.name
+      });
+    }
+    origInviteClan();
+  };
+
+  socket.on('clan_invite_received', ({ fromName, clanTag, clanName }) => {
+    if (confirm(`🛡️ Игрок ${fromName} приглашает вас вступить в клан [${clanTag}] ${clanName}!\nПринять приглашение?`)) {
+      state.clan = {
+        tag: clanTag,
+        name: clanName,
+        level: 1,
+        members: [{ id: state.playerId, name: state.nickname, role: 'Боец клана' }]
+      };
+      showToast(`🛡️ Вы вступили в клан [${clanTag}] ${clanName}!`);
+      updateUI();
+      saveGame();
+    }
+  });
+})();
+</script>
 </body>
 </html>
