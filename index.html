@@ -1,0 +1,3733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ГОСНОМЕР: ИМПЕРИЯ 5.0 — Онлайн-Симулятор</title>
+<style>
+  :root {
+    --bg: #07080c;
+    --panel: #10131c;
+    --panel-2: #171b28;
+    --panel-3: #1f2537;
+    --border: #283046;
+    --text: #f3f4f6;
+    --muted: #8b95ab;
+    --accent: #3b82f6;
+    --green: #10b981;
+    --dirty: #a855f7;
+    --red: #ef4444;
+    --gold: #f59e0b;
+    --gem: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #131829 0%, var(--bg) 70%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(16, 19, 28, 0.94);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand-wrap { display: flex; align-items: center; gap: 12px; }
+  .brand { font-weight: 900; font-size: 17px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+  .brand span { background: linear-gradient(90deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .lvl-box {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .lvl-badge {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .xp-bar-bg { width: 80px; height: 7px; background: #0b0d13; border-radius: 4px; overflow: hidden; border: 1px solid #262e42; }
+  .xp-bar-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); width: 0%; transition: width 0.3s ease; }
+
+  .stats-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .stat-pill {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 6px 11px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-pill.clean .val { color: var(--green); font-size: 13.5px; font-weight: 900; }
+  .stat-pill.dirty .val { color: #c084fc; font-size: 13.5px; font-weight: 900; }
+  .stat-pill.gem { border-color: rgba(6, 182, 212, 0.55); background: rgba(6, 182, 212, 0.12); cursor: pointer; }
+  .stat-pill.gem .val { color: #22d3ee; font-size: 13.5px; font-weight: 900; }
+
+  /* NAVIGATION */
+  nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 9px 18px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  nav button {
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 8px 13px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 12.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  nav button:hover { color: #fff; transform: translateY(-1px); border-color: #3f4b6b; }
+  nav button.active {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: #fff;
+    border-color: #60a5fa;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+  }
+  nav button.donate-tab { border-color: rgba(6, 182, 212, 0.5); color: #67e8f9; }
+  nav button.donate-tab.active {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    color: #fff;
+    border-color: #22d3ee;
+    box-shadow: 0 4px 18px rgba(6, 182, 212, 0.45);
+  }
+  .nav-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-weight: 900;
+  }
+
+  /* MAIN & TRANSITIONS */
+  main { flex: 1; max-width: 1280px; width: 100%; margin: 0 auto; padding: 18px; }
+  .location-banner {
+    background: linear-gradient(90deg, rgba(30,41,59,0.85), rgba(15,23,42,0.4));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 11px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    animation: slideBanner 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideBanner { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+  .tab-section { display: none; }
+  .tab-section.active {
+    display: block;
+    animation: pageTransition 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes pageTransition {
+    0% { opacity: 0; transform: translateY(12px) scale(0.985); filter: blur(3px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  .roller-layout { display: grid; grid-template-columns: 410px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .roller-layout { grid-template-columns: 1fr; } }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+
+  /* REFERENCE VIDEO CARD */
+  .ref-card {
+    background: #0b0d12;
+    border: 2px solid #2b303c;
+    border-radius: 28px;
+    padding: 24px 20px;
+    position: relative;
+    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.16s ease;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.75);
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ref-card.pulse { transform: scale(1.028); }
+  .rarity-0 { border-color: #4b5563; box-shadow: 0 0 25px rgba(75, 85, 99, 0.2); }
+  .rarity-1 { border-color: #3b82f6; box-shadow: 0 0 32px rgba(59, 130, 246, 0.38); background: radial-gradient(circle at top, rgba(59,130,246,0.14), #0b0d12 72%); }
+  .rarity-2 { border-color: #6366f1; box-shadow: 0 0 36px rgba(99, 102, 241, 0.45); background: radial-gradient(circle at top, rgba(99,102,241,0.18), #0b0d12 72%); }
+  .rarity-3 { border-color: #a855f7; box-shadow: 0 0 42px rgba(168, 85, 247, 0.55); background: radial-gradient(circle at top, rgba(168,85,247,0.22), #0b0d12 72%); }
+  .rarity-4 { border-color: #d946ef; box-shadow: 0 0 48px rgba(217, 70, 239, 0.6); background: radial-gradient(circle at top, rgba(217,70,239,0.25), #0b0d12 72%); }
+  .rarity-5 { border-color: #f43f5e; box-shadow: 0 0 58px rgba(244, 63, 94, 0.7); background: radial-gradient(circle at top, rgba(244,63,94,0.28), #0b0d12 72%); }
+  .rarity-6 { border-color: #f59e0b; box-shadow: 0 0 70px rgba(245, 158, 11, 0.85); background: radial-gradient(circle at top, rgba(245,158,11,0.32), #0b0d12 72%); }
+
+  .card-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .rarity-label { font-size: 14px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; }
+  .serial-num { font-size: 13px; color: #7c8599; font-weight: 700; }
+  .condition-sub { font-size: 14px; color: #b0b7c6; margin-bottom: 14px; min-height: 20px; font-weight: 500; }
+
+  /* 3D LICENSE PLATE */
+  .plate-wrap { position: relative; margin: 8px auto 18px; width: 100%; max-width: 350px; height: 82px; perspective: 700px; }
+  .plate-box {
+    width: 100%; height: 100%;
+    background: linear-gradient(165deg, #ffffff 0%, #f1f5f9 45%, #dbe2ea 100%);
+    border: 4px solid #111317;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: #0b0c0e; font-weight: 900;
+    box-shadow: inset 0 0 0 2px #ffffff, inset 0 2px 5px rgba(0,0,0,0.25), 0 12px 26px rgba(0,0,0,0.75);
+    position: relative; overflow: hidden;
+  }
+  .plate-box::before {
+    content: ""; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent);
+    transform: skewX(-25deg); animation: plateShine 5s infinite; pointer-events: none;
+  }
+  @keyframes plateShine { 0%, 70% { left: -120%; } 100% { left: 160%; } }
+  .plate-bolt {
+    position: absolute; width: 8px; height: 8px;
+    background: radial-gradient(circle, #cbd5e1 20%, #475569 90%);
+    border: 1px solid #1e293b; border-radius: 50%; z-index: 4;
+  }
+  .plate-bolt.bl { left: 8px; top: 50%; transform: translateY(-50%); }
+  .plate-bolt.br { right: 82px; top: 50%; transform: translateY(-50%); }
+  .plate-holo {
+    position: absolute; left: 22px; bottom: 6px; width: 11px; height: 11px; border-radius: 2px;
+    background: linear-gradient(135deg, #a5f3fc, #f472b6, #fde047); opacity: 0.75;
+    border: 1px solid rgba(0,0,0,0.2); font-size: 6px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900;
+  }
+  .plate-box.crashed {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 52%, 84% 100%, 0% 100%);
+    background: linear-gradient(135deg, #e5e7eb 0%, #cbd5e1 48%, #64748b 100%);
+  }
+  .plate-box.crashed::after {
+    content: ""; position: absolute; right: -14px; bottom: -14px; width: 72px; height: 48px;
+    background: linear-gradient(45deg, #1f2937, #94a3b8); transform: rotate(-28deg);
+    box-shadow: -5px -5px 12px rgba(0,0,0,0.65); border-top: 2px solid #0f172a;
+  }
+  .plate-scratches {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(115deg, rgba(15,23,42,0.24) 0px, rgba(15,23,42,0.24) 2px, transparent 2px, transparent 16px);
+    opacity: 0;
+  }
+  .plate-main {
+    flex: 1; display: flex; align-items: baseline; justify-content: center; gap: 6px;
+    font-family: 'Arial Black', Impact, sans-serif; letter-spacing: 2px; padding-left: 14px;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.9), 0 -1px 1px rgba(0,0,0,0.25);
+  }
+  .plate-main .let { font-size: 32px; text-transform: lowercase; }
+  .plate-main .let.upper { text-transform: uppercase; font-size: 29px; }
+  .plate-main .dig { font-size: 43px; line-height: 1; }
+  .plate-region-box {
+    width: 88px; height: 100%; border-left: 3.5px solid #111317;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 4px; font-family: 'Arial Black', sans-serif;
+  }
+  .plate-region-num { font-size: 27px; line-height: 1; }
+  .plate-country-row { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; margin-top: 3px; }
+  .flag-icon { width: 18px; height: 12px; border: 1px solid #333; display: inline-block; border-radius: 2px; }
+  .flag-rus { background: linear-gradient(180deg, #fff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%); }
+  .flag-blr { background: linear-gradient(180deg, #c8313e 66%, #4aa657 66%); }
+  .flag-kaz { background: #00afca; }
+  .kz-flag-left {
+    width: 36px; height: 100%; border-right: 2.5px solid #111;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #005b7f;
+  }
+
+  .price-display { font-size: 39px; font-weight: 900; letter-spacing: -1px; margin: 2px 0 6px; font-variant-numeric: tabular-nums; }
+  .chance-sub { font-size: 13px; color: #9ca3af; margin-bottom: 16px; line-height: 1.35; }
+  .mods-container { display: flex; flex-direction: column; gap: 7px; }
+  .mod-pill {
+    background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 800;
+    display: flex; justify-content: space-between; align-items: center; text-transform: uppercase;
+    animation: popMod 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  }
+  @keyframes popMod { from { opacity: 0; transform: scale(0.85) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  /* BUYOUT PANEL AFTER ROLL */
+  .buyout-action-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(37, 99, 235, 0.12));
+    border: 1.5px solid #10b981;
+    border-radius: 14px;
+    padding: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    animation: popMod 0.25s ease;
+  }
+  .buyout-action-box.show { display: flex; }
+
+  /* CARDS & BUTTONS */
+  .box-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+    padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .box-card:hover { border-color: #384361; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 800; background: var(--panel-2); border: 1px solid var(--border); }
+
+  .btn-main {
+    background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none;
+    padding: 14px 18px; border-radius: 13px; font-size: 15px; font-weight: 900; cursor: pointer;
+    box-shadow: 0 8px 22px rgba(234, 88, 12, 0.35); transition: transform 0.15s, opacity 0.2s;
+  }
+  .btn-main:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn-main:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-buyout {
+    background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none;
+    padding: 13px 16px; border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); transition: transform 0.15s;
+  }
+  .btn-buyout:hover:not(:disabled) { transform: translateY(-2px); }
+
+  .btn-sec {
+    background: var(--panel-2); color: #fff; border: 1px solid var(--border);
+    padding: 9px 13px; border-radius: 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: 0.2s;
+  }
+  .btn-sec:hover:not(:disabled) { border-color: #60a5fa; background: var(--panel-3); }
+  .btn-sec:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sec.sell { background: rgba(16, 185, 129, 0.13); border-color: #10b981; color: #34d399; }
+  .btn-sec.dirty { background: rgba(168, 85, 247, 0.15); border-color: #a855f7; color: #d8b4fe; }
+  .btn-sec.gem { background: rgba(6, 182, 212, 0.15); border-color: #06b6d4; color: #67e8f9; }
+  .btn-sec.auc { background: rgba(245, 158, 11, 0.15); border-color: #f59e0b; color: #fcd34d; }
+
+  .country-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .country-btn {
+    background: var(--panel-2); border: 2px solid var(--border); color: var(--text);
+    padding: 11px; border-radius: 12px; font-weight: 800; cursor: pointer; text-align: center; transition: 0.2s;
+  }
+  .country-btn.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.15); }
+
+  .mini-plate {
+    background: linear-gradient(180deg, #ffffff, #e2e8f0); color: #0f172a;
+    border: 2.5px solid #111; border-radius: 7px; padding: 5px 11px;
+    font-family: 'Arial Black', sans-serif; font-weight: 900; font-size: 15px;
+    display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  }
+  .mini-plate.crashed {
+    background: linear-gradient(135deg, #cbd5e1, #64748b);
+    clip-path: polygon(0 0, 100% 0, 100% 65%, 88% 100%, 0 100%);
+  }
+
+  /* REAL INTERNET CAR PHOTOS */
+  .car-photo-stage {
+    width: 100%; height: 155px; border-radius: 13px; border: 1px solid #263147;
+    position: relative; overflow: hidden; background: #0b0e14;
+  }
+  .car-photo-stage img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
+  .box-card:hover .car-photo-stage img { transform: scale(1.05); }
+  .car-plate-badge {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(180deg, #fff, #e2e8f0); color: #000; border: 2px solid #111;
+    border-radius: 5px; padding: 2px 10px; font-family: 'Arial Black', sans-serif;
+    font-size: 12px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,0.85); white-space: nowrap;
+  }
+
+  /* CASE ROULETTE */
+  .case-roller-modal {
+    background: #0b0e17; border: 2px solid var(--accent); border-radius: 20px;
+    padding: 20px; margin-bottom: 22px; display: none; position: relative; overflow: hidden;
+  }
+  .case-roller-modal.active { display: block; }
+  .roulette-viewport {
+    width: 100%; height: 115px; background: #06080d; border: 2px solid var(--border);
+    border-radius: 14px; position: relative; overflow: hidden; margin: 14px 0;
+  }
+  .roulette-center-line {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 4px;
+    transform: translateX(-50%); background: #f59e0b; box-shadow: 0 0 14px #f59e0b; z-index: 10;
+  }
+  .roulette-track { display: flex; align-items: center; height: 100%; gap: 10px; padding: 0 10px; will-change: transform; }
+  .roulette-item {
+    min-width: 175px; height: 90px; background: var(--panel-2); border-bottom: 5px solid #4b5563;
+    border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; flex-shrink: 0;
+  }
+
+  /* 4-BOLT UNSCREW MINI-GAME */
+  .car-bumper-stage {
+    background: linear-gradient(180deg, #161b29 0%, #0d1018 100%);
+    border: 2px solid #2b354f; border-radius: 18px; padding: 20px; text-align: center; position: relative;
+  }
+  .bumper-plate-holder {
+    max-width: 320px; height: 90px; margin: 14px auto; background: #f1f5f9;
+    border: 4px solid #111; border-radius: 10px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    color: #111; font-family: 'Arial Black', sans-serif; font-size: 28px;
+  }
+  .screw-node {
+    position: absolute; width: 24px; height: 24px; border-radius: 50%;
+    background: radial-gradient(circle, #94a3b8, #334155); border: 2px solid #0f172a;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 900; transition: all 0.25s;
+  }
+  .screw-node.active { border-color: #f59e0b; box-shadow: 0 0 14px #f59e0b; transform: scale(1.2); }
+  .screw-node.done { background: #10b981; border-color: #059669; transform: scale(0.75); opacity: 0.45; }
+  .screw-tl { top: 6px; left: 8px; }
+  .screw-tr { top: 6px; right: 8px; }
+  .screw-bl { bottom: 6px; left: 8px; }
+  .screw-br { bottom: 6px; right: 8px; }
+
+  .timing-bar {
+    width: 100%; height: 34px; background: #0d1017; border-radius: 17px;
+    position: relative; overflow: hidden; border: 2px solid var(--border); margin: 14px 0;
+  }
+  .timing-zone { position: absolute; top: 0; bottom: 0; background: rgba(16, 185, 129, 0.45); border-left: 2px solid #10b981; border-right: 2px solid #10b981; }
+  .timing-cursor { position: absolute; top: 0; bottom: 0; width: 8px; background: #f59e0b; box-shadow: 0 0 12px #f59e0b; left: 0%; }
+
+  /* SCRAP GRID */
+  .scrap-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+  .scrap-cell {
+    background: var(--panel-2); border: 2px dashed #374151; border-radius: 12px; height: 86px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 22px; transition: 0.2s; text-align: center; padding: 4px;
+  }
+  .scrap-cell:hover { border-color: var(--gold); background: var(--panel-3); }
+
+  /* SUBTABS */
+  .sub-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .sub-nav button {
+    background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 10px; font-weight: 800; cursor: pointer;
+  }
+  .sub-nav button.active { background: var(--accent); color: #fff; border-color: #60a5fa; }
+
+  .prog-wrap { width: 100%; height: 10px; background: #0b0d13; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin: 6px 0; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, #a855f7, #10b981); width: 0%; transition: width 0.2s; }
+
+  input, select {
+    background: var(--panel-2); color: #fff; border: 1px solid var(--border);
+    padding: 9px 12px; border-radius: 9px; font-size: 13px;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { padding: 11px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  tr.me { background: rgba(59, 130, 246, 0.15); font-weight: 800; }
+
+  /* MODALS */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; z-index: 500; padding: 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
+    max-width: 480px; width: 100%; padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+  }
+
+  .donate-card {
+    background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.18), var(--panel) 70%);
+    border: 1.5px solid rgba(6, 182, 212, 0.4);
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  #toast {
+    position: fixed; bottom: 22px; right: 22px;
+    background: #1e293b; border-left: 4px solid var(--accent);
+    color: #fff; padding: 12px 18px; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+    font-size: 13.5px; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 999;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-wrap">
+    <div class="brand">🚔 <span>ГОСНОМЕР: ИМПЕРИЯ 5.0</span></div>
+    <div class="lvl-box" title="Каждые 10 уровней вы получаете бонус +50 Кристаллов!">
+      <span class="lvl-badge" id="ui-lvl">УР. 1</span>
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-bottom:2px;">
+          <span>ОПЫТ (+50💎/10ур)</span><span id="ui-xp-text">0 / 95 XP</span>
+        </div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="ui-xp-bar"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill clean">💰 Чистые: <span class="val" id="ui-money">3 000 ₽</span></div>
+    <div class="stat-pill dirty">🕶️ Грязные: <span class="val" id="ui-dirty">0 ₽</span></div>
+    <div class="stat-pill gem" onclick="switchTab('donate')">💎 Кристаллы: <span class="val" id="ui-gems">30</span> ➕</div>
+    <div class="stat-pill">🏛️ Налог: <span class="val" id="ui-tax" style="color:#f87171">35.0%</span></div>
+    <div class="stat-pill">🚗 Гараж: <span class="val" id="ui-car-slots">0/0</span></div>
+    <div class="stat-pill">📦 Склад: <span class="val" id="ui-inv-count">0/15</span></div>
+  </div>
+</header>
+
+<nav id="main-nav">
+  <button class="active" onclick="switchTab('roller')">🎰 МРЭО ГАИ</button>
+  <button onclick="switchTab('inventory')">📦 Склад</button>
+  <button onclick="switchTab('trade')">🤝 Торги и С рук</button>
+  <button onclick="switchTab('auction')">🔨 Аукцион</button>
+  <button class="donate-tab" onclick="switchTab('donate')">💎 Донат-Магазин</button>
+  <button onclick="switchTab('skills')">🧠 Навыки <span class="nav-badge" id="skill-point-badge" style="display:none">0</span></button>
+  <button onclick="switchTab('cases')">🧰 Кейсы</button>
+  <button onclick="switchTab('steal')">🥷 Скрутка и Свалка</button>
+  <button onclick="switchTab('launder')">🧼 Отмыв кэша</button>
+  <button onclick="switchTab('empire')">🚗 Авто и Бизнес</button>
+  <button onclick="switchTab('clan')">🛡️ Клан и Топ</button>
+  <button onclick="switchTab('profile')">👤 Профиль <span class="nav-badge" id="ach-ready-badge" style="display:none">!</span></button>
+</nav>
+
+<main>
+  <!-- Location Banner -->
+  <div class="location-banner" id="loc-banner">
+    <div>
+      <div style="font-weight:900; font-size:15px;" id="loc-title">📍 Отделение МРЭО ГИБДД</div>
+      <div style="font-size:12px; color:var(--muted);" id="loc-desc">Прокрутка и выкуп государственных номерных знаков РФ, РБ и РК</div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="badge" id="ui-id-pill">ID: 774920</span>
+      <span class="badge" id="ui-luck-info">Фактор удачи: x0.35 (Ур. 1)</span>
+    </div>
+  </div>
+
+  <!-- 1. ROLLER TAB -->
+  <section id="tab-roller" class="tab-section active">
+    <div class="roller-layout">
+      <!-- Reference Video Card -->
+      <div id="ref-card" class="ref-card rarity-0">
+        <div class="card-top-row">
+          <div class="rarity-label" id="card-rarity-text" style="color:#9ca3af">• ОЖИДАНИЕ ВЫПУСКА</div>
+          <div class="serial-num" id="card-serial">№ 2 708</div>
+        </div>
+        <div class="condition-sub" id="card-condition">Битый, но твой дороже? Прокрутите номер!</div>
+
+        <div class="plate-wrap">
+          <div id="plate-visual" class="plate-box">
+            <div class="plate-bolt bl"></div>
+            <div class="plate-bolt br"></div>
+            <div class="plate-holo">RUS</div>
+            <div class="plate-scratches" id="plate-scratches"></div>
+            <div class="plate-main" id="plate-main-content">
+              <span class="let">с</span>
+              <span class="dig">777</span>
+              <span class="let">сс</span>
+            </div>
+            <div class="plate-region-box" id="plate-region-content">
+              <div class="plate-region-num">77</div>
+              <div class="plate-country-row">RUS <span class="flag-icon flag-rus"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-display" id="card-price">0 ₽</div>
+        <div class="chance-sub" id="card-chance">Регион 77 · Москва · шанс зависит от Уровня и Навыков</div>
+
+        <div class="mods-container" id="card-mods"></div>
+      </div>
+
+      <!-- Controls & Buyout Window -->
+      <div class="box-card">
+        <h3>1. Выберите стандарт и регион</h3>
+        <div class="country-selector">
+          <div class="country-btn active" id="country-RU" onclick="selectCountry('RU')">🇷🇺 Россия<br><small style="color:var(--muted)">ГОСТ РФ</small></div>
+          <div class="country-btn" id="country-BY" onclick="selectCountry('BY')">🇧🇾 Беларусь<br><small style="color:var(--muted)">Стандарт РБ</small></div>
+          <div class="country-btn" id="country-KZ" onclick="selectCountry('KZ')">🇰🇿 Казахстан<br><small style="color:var(--muted)">Стандарт РК</small></div>
+        </div>
+
+        <!-- BUYOUT PANEL -->
+        <div id="roller-buyout-box" class="buyout-action-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:900; font-size:14px; color:#34d399;">🔔 Номер готов к выдаче в окне МРЭО!</span>
+            <span class="badge" id="buyout-max-markup-tag" style="color:var(--gold)">Макс. наценка: +25.0%</span>
+          </div>
+          <p style="font-size:12px; color:var(--muted);">
+            Выкупите номер по госпошлине себе на склад, либо откройте окно предпросмотра для мгновенной сдачи в Госвыкуп.
+          </p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button class="btn-buyout" style="grid-column: span 2;" id="btn-buyout-keep" onclick="buyoutRolledPlateToInventory()">
+              📥 ВЫКУПИТЬ НОМЕР СЕБЕ НА СКЛАД (Пошлина: 0 ₽)
+            </button>
+            <button class="btn-sec sell" id="btn-buyout-state" onclick="previewStateBuyoutRolledPlate()">
+              🏛️ Сдать в Госвыкуп (Предпросмотр)
+            </button>
+            <button class="btn-sec" onclick="discardRolledPlate()">
+              🗑️ Не выкупать (Сбросить)
+            </button>
+          </div>
+        </div>
+
+        <div style="background:var(--panel-2); padding:13px; border-radius:12px; border:1px solid var(--border); font-size:12.5px; color:var(--muted); line-height:1.5;">
+          ⚖️ <b style="color:#fff">Экономика и правила 5.0:</b><br>
+          • Каждые <b>10 уровней</b> начисляется бонус <b>+50 💎 Кристаллов</b>, а также награды за Достижения в Профиле.<br>
+          • При продаже номеров в Гос или на Чёрный рынок сначала открывается <b>Окно расчёта и подтверждения</b>.<br>
+          • Текущий государственный налог (на продажу и бизнес): <b><span id="roller-tax-label">35.0%</span></b>.
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <button class="btn-main" style="grid-column: span 2;" id="btn-roll" onclick="rollPlate('gai')">🎰 ПРОКРУТИТЬ НОМЕР В ОЧЕРЕДИ (300 ₽)</button>
+          <button class="btn-sec" style="grid-column: span 2;" id="btn-roll-vip" onclick="rollPlate('vip')">💼 Спецзаказ через полковника МРЭО (8 500 ₽)</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. INVENTORY TAB -->
+  <section id="tab-inventory" class="tab-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <h3>📦 Склад Выкупленных Госномеров</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn-sec sell" onclick="openSalePreviewModal('bulk', 'clean')">🏛️ Продать Обычные в Гос (Налог <span id="inv-tax-txt">35.0%</span>)</button>
+        <button class="btn-sec dirty" onclick="openSalePreviewModal('bulk', 'dirty')">🕶️ Слить Обычные барыгам (Риск <span id="inv-sting-txt">22.0%</span>)</button>
+      </div>
+    </div>
+    <div id="inventory-grid" class="grid-3"></div>
+  </section>
+
+  <!-- 3. TRADE, HAGGLING & BUYING SECONDHAND -->
+  <section id="tab-trade" class="tab-section">
+    <div class="sub-nav">
+      <button class="active" id="tr-sub-btn-hands" onclick="switchTradeSub('hands')">🚗 Выкуп с рук (Терпение зависит от Редкости)</button>
+      <button id="tr-sub-btn-sell" onclick="switchTradeSub('sell')">🤝 Продать свой номер людям (Разный % и риск)</button>
+    </div>
+
+    <!-- SUBTAB A: BUYING SECONDHAND -->
+    <div id="tr-sub-hands">
+      <div class="box-card" style="margin-bottom:16px; flex-direction:row; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+          <h3>🚗 Авторынок: Выкуп номеров с рук у частников</h3>
+          <p style="font-size:12.5px; color:var(--muted);">
+            ⚠️ <b>Зависимость терпения от редкости:</b> Чем дороже и реже номер у продавца, тем <b>ниже его начальное терпение</b> при торге! Владельцы Легендарных и Секретных номеров не терпят наглого сбивания цены.
+          </p>
+        </div>
+        <button class="btn-sec" onclick="generateSecondhandMarket()">🔄 Искать новых продавцов (500 ₽)</button>
+      </div>
+      <div id="secondhand-grid" class="grid-3"></div>
+    </div>
+
+    <!-- SUBTAB B: SELL TO PLAYERS -->
+    <div id="tr-sub-sell" style="display:none;">
+      <div class="roller-layout">
+        <div class="box-card">
+          <h3>🤝 Продажа номера людям и система Торга</h3>
+          <p style="font-size:12.5px; color:var(--muted);">
+            Максимальный процент наценки зависит от <b>Редкости номера</b> и навыка <b>«Гений Переговоров»</b>. Все вероятности округлены до десятых долей процента.
+          </p>
+
+          <label style="font-size:12px; color:var(--muted);">1. Выберите номер со склада:</label>
+          <select id="trade-plate-select" onchange="updateTradePriceBounds()" style="width:100%;"></select>
+
+          <label style="font-size:12px; color:var(--muted);">2. Покупатель (Друг или ID игрока):</label>
+          <div style="display:flex; gap:8px;">
+            <select id="trade-friend-select" onchange="syncTradeRecipientInput()" style="flex:1;"></select>
+            <input id="trade-target-id" placeholder="ID напр. 777001" style="width:140px;" oninput="updateTradeSliderDisplay()">
+          </div>
+
+          <div style="background:var(--panel-2); padding:14px; border-radius:12px; border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+              <span>Ваша наценка: <b id="trade-markup-label" style="color:var(--gold)">+15.0%</b></span>
+              <span>Макс. для этой редкости: <b id="trade-max-label" style="color:#60a5fa">+25.0%</b></span>
+            </div>
+            <input type="range" id="trade-markup-slider" min="-20" max="25" step="0.5" value="15" style="width:100%;" oninput="updateTradeSliderDisplay()">
+
+            <div style="font-size:17px; font-weight:900; color:var(--green); margin-top:8px;">
+              Цена предложения: <span id="trade-final-price">0 ₽</span>
+            </div>
+
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px; font-size:12px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>✅ Вероятность успешной сделки: <b id="trade-success-pct" style="color:var(--green)">70.0%</b></span>
+                <span>❌ Шанс срыва сделки: <b id="trade-fail-pct" style="color:var(--red)">30.0%</b></span>
+              </div>
+              <div class="prog-wrap" style="height:8px;">
+                <div id="trade-prob-bar" style="height:100%; width:70%; background:linear-gradient(90deg, #10b981, #f59e0b, #ef4444); transition:0.2s;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-main" style="flex:1" onclick="sendPlayerTradeOffer()">📨 Предложить сделку / Начать торг</button>
+            <button class="btn-sec" onclick="generateShareTradeCode()">🔗 Код другу</button>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="box-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3>📩 Входящие запросы на выкуп</h3>
+              <button class="btn-sec" onclick="generateIncomingBuyerOffer()">🔄 Найти клиента</button>
+            </div>
+            <div id="incoming-trades-box" style="display:flex; flex-direction:column; gap:10px;"></div>
+          </div>
+
+          <div class="box-card">
+            <h3>📦 Принять номер по коду от друга</h3>
+            <div style="display:flex; gap:8px;">
+              <input id="import-trade-code-inp" placeholder="Вставьте код обмена..." style="flex:1;">
+              <button class="btn-sec sell" onclick="redeemShareTradeCode()">Принять</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. AUCTION TAB (BIDDING SLIDER + FAST SALE + PERSISTENT LOTS) -->
+  <section id="tab-auction" class="tab-section">
+    <div class="box-card" style="margin-bottom:18px; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+      <div>
+        <h3>🔨 Центральный Аукцион Госномеров</h3>
+        <p style="font-size:13px; color:var(--muted)">
+          До обновления витрины: <b id="auction-timer" style="color:var(--gold); font-size:15px;">05:00</b><br>
+          <small>✔ Ваши активные лоты <b>продолжают продаваться даже после обновления аукциона</b>! Используйте «⚡ Ускорить», чтобы продать лот быстрее.</small>
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn-sec auc" onclick="openListAuctionModal()">➕ Выставить свой номер на торги</button>
+        <button class="btn-sec gem" onclick="forceRefreshAuction()">💎 Обновить витрину (15 💎)</button>
+      </div>
+    </div>
+
+    <div id="my-auction-section" style="margin-bottom:22px; display:none;">
+      <h3 style="margin-bottom:10px; color:var(--gold);">⏳ Мои активные лоты (Не сбрасываются при обновлении аукциона + доступно Ускорение)</h3>
+      <div id="my-auction-grid" class="grid-3"></div>
+    </div>
+
+    <h3 style="margin-bottom:10px;">🛒 Лоты на торгах (Используйте ползунок ставки для выбора цены и шанса победы)</h3>
+    <div id="auction-grid" class="grid-3"></div>
+  </section>
+
+  <!-- 5. DONATE SHOP -->
+  <section id="tab-donate" class="tab-section">
+    <div class="box-card" style="margin-bottom:18px; background:linear-gradient(90deg, rgba(6,182,212,0.16), rgba(16,19,28,0.9)); border-color:#06b6d4;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="color:#22d3ee;">💎 Официальный Донат-Магазин и Валютный Обменник</h2>
+          <p style="font-size:13px; color:var(--muted); margin-top:4px;">
+            Покупка 💎 за реальные деньги и мгновенный обмен на виртуальные рубли (💰).
+          </p>
+        </div>
+        <div class="stat-pill gem" style="font-size:15px; padding:10px 16px;">
+          Ваш баланс: <span class="val" id="donate-gem-bal">30</span> 💎
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px;">💳 1. Покупка 💎 Кристаллов за реальные деньги</h3>
+    <div class="grid-4" style="margin-bottom:26px;" id="donate-packs-grid"></div>
+
+    <h3 style="margin-bottom:12px;">💱 2. Обмен 💎 Кристаллов на виртуальную валюту (💰 Чистые рубли)</h3>
+    <div class="grid-4" id="donate-exchange-grid"></div>
+  </section>
+
+  <!-- 6. SKILLS TAB -->
+  <section id="tab-skills" class="tab-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3>🧠 Древо Навыков Персонажа (20–25 уровней)</h3>
+        <p style="font-size:13px; color:var(--muted)">
+          Очки навыков выдаются за каждый уровень персонажа. Навык «Налоговый Оптимизатор» снижает налог как с продажи номеров, так и с прибыли ваших Предприятий!
+        </p>
+      </div>
+      <div class="stat-pill" style="border-color:var(--gold); padding:8px 14px;">
+        <span style="color:var(--gold)">⭐ Доступно очков навыков:</span> <b id="ui-sp-count" style="font-size:15px;">0</b>
+      </div>
+    </div>
+    <div id="skills-grid" class="grid-3"></div>
+  </section>
+
+  <!-- 7. CASES TAB -->
+  <section id="tab-cases" class="tab-section">
+    <div id="case-roller-modal" class="case-roller-modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="case-opening-title">🎰 Открываем кейс...</h3>
+        <span class="badge" style="color:var(--gold)">Рулетка ГОСТ</span>
+      </div>
+      <div class="roulette-viewport">
+        <div class="roulette-center-line"></div>
+        <div class="roulette-track" id="roulette-track"></div>
+      </div>
+      <div style="text-align:center; font-size:13px; color:var(--muted);" id="case-opening-status">Лента крутится...</div>
+    </div>
+    <div class="grid-3" id="cases-grid"></div>
+  </section>
+
+  <!-- 8. STEAL & SCRAPYARD -->
+  <section id="tab-steal" class="tab-section">
+    <div class="roller-layout">
+      <div class="box-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>🥷 Ночная скрутка номеров с авто</h3>
+          <span class="badge" style="color:#c084fc">4 Болта крепления</span>
+        </div>
+        <p style="font-size:12.5px; color:var(--muted);">
+          Открутите <b>4 болта</b> по очереди, попадая в зелёную зону! Шанс выбить редкий номер до 500 000 ₽ напрямую зависит от вашего Уровня.
+        </p>
+
+        <div class="car-bumper-stage">
+          <div style="font-size:12px; color:var(--muted); margin-bottom:4px;" id="steal-car-label">Цель: Припаркованный седан во дворе</div>
+          <div class="bumper-plate-holder">
+            <div class="screw-node screw-tl active" id="bolt-0">1</div>
+            <div class="screw-node screw-tr" id="bolt-1">2</div>
+            <div class="screw-node screw-bl" id="bolt-2">3</div>
+            <div class="screw-node screw-br" id="bolt-3">4</div>
+            <span id="steal-mystery-text">? ??? ??</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;">
+            <span>Болт: <b id="steal-bolt-num" style="color:var(--gold)">1 из 4</b></span>
+            <span>Сирена через: <b id="steal-timer-txt" style="color:var(--red)">12.0 сек</b></span>
+          </div>
+
+          <div class="timing-bar">
+            <div class="timing-zone" id="steal-zone" style="left:42%; width:16%;"></div>
+            <div class="timing-cursor" id="steal-cursor"></div>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="btn-main" style="flex:1" onclick="hitBolt()">🪛 ОТКРУТИТЬ БОЛТ (Пробел / Клик)</button>
+            <button class="btn-sec" onclick="resetStealGame()">🔄 Сменить двор</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="box-card">
+        <h3>🔩 Автосвалка «Чермет» <span class="badge">Поиск: 350 ₽</span></h3>
+        <p style="font-size:12.5px; color:var(--muted);">
+          Ищите номера под прессом. Почти все находки здесь <b>«После ДТП»</b>, но после реставрации на складе их стоимость удваивается!
+        </p>
+        <div class="scrap-grid" id="scrap-grid"></div>
+        <button class="btn-sec" onclick="initScrapyard()">🚜 Обновить завалы металлолома (Бесплатно)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. MONEY LAUNDERING (TIED TO OWNED BUSINESSES) -->
+  <section id="tab-launder" class="tab-section">
+    <div class="roller-layout">
+      <div class="box-card">
+        <h3>🧼 Прачечная: Отмыв теневого кэша (Открывается покупкой Предприятий)</h3>
+        <p style="font-size:13px; color:var(--muted); line-height:1.5;">
+          Покупка новых видов <b>Предприятий</b> во вкладке «Авто и Бизнес» открывает более крупные и быстрые каналы легализации грязных денег!
+        </p>
+        <div style="background:var(--panel-2); padding:14px; border-radius:14px; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+            <span>В процессе отмыва: <b id="launder-active-amt" style="color:#c084fc">0 ₽</b></span>
+            <span id="launder-time-left">Готово к запуску</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" id="launder-prog"></div></div>
+          <div style="font-size:12px; color:var(--muted); margin-top:6px;">
+            Базовая комиссия прачечной: <b id="launder-fee-txt" style="color:var(--gold)">25.0%</b> (Снижается навыком «Теневой Прачка»)
+          </div>
+        </div>
+        <div class="grid-3" id="launder-schemes"></div>
+      </div>
+
+      <div class="box-card">
+        <h3>🚔 Контроль ОБЭП</h3>
+        <p style="font-size:13px; color:var(--muted);">
+          Хранение более <b>50 000 ₽ грязного кэша</b> привлекает внимание ОБЭП. Открывайте предприятия, чтобы отмывать крупные суммы за один цикл!
+        </p>
+        <div style="padding:14px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:12px; font-size:13px;">
+          Риск облавы на склад кэша: <b id="obep-risk-txt" style="color:var(--green)">Низкий (0.0%)</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. EMPIRE (NON-STACKING REAL ESTATE CAR SLOTS & TAXED BUSINESSES) -->
+  <section id="tab-empire" class="tab-section">
+    <div class="box-card" style="margin-bottom:18px; background:var(--panel-2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3>🏡 Правило Недвижимости и Автопарка</h3>
+          <p style="font-size:12.5px; color:var(--muted);">
+            Покупка недвижимости открывает возможность покупать автомобили. <b>Слоты под авто от разных домов НЕ суммируются</b> — действует вместимость вашей самой престижной недвижимости!
+          </p>
+        </div>
+        <div class="badge" style="font-size:13px; color:var(--gold); padding:8px 12px;" id="empire-car-cap-info">
+          Машин в гараже: 0 из 0 (Купите недвижимость!)
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px;">🏡 1. Недвижимость (Задаёт лимит мест под автомобили и расширяет склад номеров)</h3>
+    <div id="homes-grid" class="grid-3" style="margin-bottom:28px;"></div>
+
+    <h3 style="margin-bottom:12px;">🚗 2. Автопарк (Требуется свободный слот в вашей Недвижимости)</h3>
+    <div id="cars-grid" class="grid-3" style="margin-bottom:28px;"></div>
+
+    <h3 style="margin-bottom:12px;">🏭 3. Предприятия (Облагаются госналогом <span id="biz-tax-header">35.0%</span> и открывают схемы Отмыва кэша)</h3>
+    <div id="biz-grid" class="grid-3"></div>
+  </section>
+
+  <!-- 11. CLAN (INVITE BY ID) & FORBES -->
+  <section id="tab-clan" class="tab-section">
+    <div class="roller-layout">
+      <div id="clan-box"></div>
+      <div class="box-card">
+        <h3>🏆 Рейтинг Forbes СНГ</h3>
+        <div style="overflow-x:auto;">
+          <table id="leaderboard-table">
+            <thead>
+              <tr><th>#</th><th>Игрок</th><th>ID</th><th>Ур.</th><th>Капитал</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. PERSONAL PROFILE & CRYSTAL ACHIEVEMENTS -->
+  <section id="tab-profile" class="tab-section">
+    <div class="sub-nav">
+      <button class="active" id="prof-btn-info" onclick="switchProfileSub('info')">🪪 Мой Профиль и Достижения (💎)</button>
+      <button id="prof-btn-friends" onclick="switchProfileSub('friends')">👥 Друзья (<span id="friends-count-lbl">3</span>)</button>
+      <button id="prof-btn-settings" onclick="switchProfileSub('settings')">⚙️ Настройки</button>
+    </div>
+
+    <div id="prof-sub-info">
+      <div class="roller-layout">
+        <div class="box-card">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div id="profile-avatar-box" style="width:74px; height:74px; border-radius:18px; background:var(--panel-2); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:38px;">😎</div>
+            <div>
+              <div style="font-size:20px; font-weight:900;" id="prof-nick-display">Охотник_777</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                <span class="badge" style="color:var(--gold); font-size:13px;" id="prof-id-display">ID: 774920</span>
+                <button class="btn-sec" style="padding:4px 8px; font-size:11px;" onclick="copyPlayerId()">📋 Скопировать ID</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <button class="btn-sec" onclick="changeNickname()">✏️ Сменить ник</button>
+            <button class="btn-sec" onclick="cycleAvatar()">🎭 Сменить аватар</button>
+          </div>
+
+          <div id="prof-detailed-stats" style="background:var(--panel-2); padding:14px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:8px; font-size:13px;"></div>
+        </div>
+
+        <div class="box-card">
+          <h3>🎖️ Достижения (Награда в 💎 Кристаллах за выполнение)</h3>
+          <div id="prof-achievements" style="display:flex; flex-direction:column; gap:10px; font-size:13px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="prof-sub-friends" style="display:none;">
+      <div class="roller-layout">
+        <div class="box-card">
+          <h3>➕ Добавить друга по ID</h3>
+          <div style="display:flex; gap:8px;">
+            <input id="add-friend-id-inp" placeholder="Введите ID (напр. 551902)" style="flex:1;">
+            <input id="add-friend-name-inp" placeholder="Имя" style="width:140px;">
+            <button class="btn-main" style="padding:9px 14px; font-size:13px;" onclick="addFriendById()">Добавить</button>
+          </div>
+          <h3 style="margin-top:14px;">🌐 Игроки онлайн</h3>
+          <div id="online-suggestions" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <div class="box-card">
+          <h3>👥 Список друзей</h3>
+          <div id="friends-list-box" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="prof-sub-settings" style="display:none;">
+      <div class="roller-layout">
+        <div class="box-card">
+          <h3>⚙️ Настройки игры и звука</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);">
+            <span>🔊 Звуковые эффекты</span>
+            <button class="btn-sec" id="set-sound-btn" onclick="toggleSetting('sound')">Включены</button>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+            <span>⚡ Быстрая анимация прокрутки</span>
+            <button class="btn-sec" id="set-fast-btn" onclick="toggleSetting('fastRoll')">Выключена</button>
+          </div>
+        </div>
+
+        <div class="box-card">
+          <h3>💾 Управление сохранением</h3>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-sec" onclick="exportSaveData()">📤 Экспорт</button>
+            <button class="btn-sec" onclick="importSaveData()">📥 Импорт</button>
+            <button class="btn-sec" style="border-color:var(--red); color:var(--red);" onclick="hardResetGame()">🗑️ Сбросить прогресс</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL 0: SALE PREVIEW & CONFIRMATION WINDOW (STATE / BLACK MARKET) -->
+<div class="modal-backdrop" id="sale-preview-modal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 id="sp-modal-title">📋 Предварительный расчёт продажи</h3>
+      <button class="btn-sec" onclick="closeSalePreviewModal()">✕</button>
+    </div>
+    <div id="sp-plate-visual" style="text-align:center;"></div>
+    <div style="background:var(--panel-2); padding:14px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:8px; font-size:13px;">
+      <div style="display:flex; justify-content:space-between;">
+        <span>Канал сбыта:</span>
+        <b id="sp-channel-name">—</b>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span>Рыночная оценка:</span>
+        <b id="sp-market-val">0 ₽</b>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span id="sp-tax-or-risk-lbl">Государственный налог ФНС:</span>
+        <b id="sp-tax-or-risk-val" style="color:var(--red)">35.0%</b>
+      </div>
+      <div style="border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:space-between; font-size:15px;">
+        <span>Ожидаемая выплата на руки:</span>
+        <b id="sp-net-payout" style="color:var(--green)">0 ₽</b>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-main" style="flex:1" id="sp-confirm-btn" onclick="confirmPreviewedSale()">✔ Подтвердить продажу</button>
+      <button class="btn-sec" onclick="closeSalePreviewModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 1: LIST PLATE ON AUCTION -->
+<div class="modal-backdrop" id="auction-list-modal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>🔨 Выставить номер на Аукцион</h3>
+      <button class="btn-sec" onclick="closeListAuctionModal()">✕</button>
+    </div>
+    <p style="font-size:12.5px; color:var(--muted);">
+      Ваш лот продолжит продаваться даже после обновления аукциона! Также вы сможете ускорить его продажу.
+    </p>
+    <select id="modal-auc-plate-sel" onchange="updateModalAucPrice()"></select>
+    <div style="background:var(--panel-2); padding:13px; border-radius:12px; border:1px solid var(--border);">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+        <span>Наценка: <b id="modal-auc-pct" style="color:var(--gold)">+20.0%</b></span>
+        <span>Потолок редкости: <b id="modal-auc-max" style="color:#60a5fa">+25.0%</b></span>
+      </div>
+      <input type="range" id="modal-auc-slider" min="-15" max="25" step="0.5" value="15" style="width:100%;" oninput="updateModalAucPrice()">
+      <div style="font-size:16px; font-weight:900; color:var(--green); margin-top:6px;">
+        Цена выкупа на торгах: <span id="modal-auc-final">0 ₽</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+        <span>✅ Шанс выкупа: <b id="modal-auc-succ" style="color:var(--green)">78.0%</b></span>
+        <span>❌ Шанс провала: <b id="modal-auc-fail" style="color:var(--red)">22.0%</b></span>
+      </div>
+    </div>
+    <button class="btn-main" onclick="confirmListPlateOnAuction()">🔨 Выставить лот на торги</button>
+  </div>
+</div>
+
+<!-- MODAL 2: INTERACTIVE HAGGLING -->
+<div class="modal-backdrop" id="haggle-modal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 id="haggle-title">💬 Торг с продавцом</h3>
+      <button class="btn-sec" onclick="closeHaggleModal()">✕</button>
+    </div>
+    <div id="haggle-plate-preview" style="text-align:center;"></div>
+    <div style="background:var(--panel-2); padding:12px; border-radius:12px; border:1px solid var(--border); font-size:13px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <span>Рыночная оценка: <b id="haggle-market-val">0 ₽</b></span>
+        <span>Текущая цена продавца: <b id="haggle-ask-val" style="color:var(--gold)">0 ₽</b></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px;">
+        <span>Терпение продавца (Зависит от редкости!):</span>
+        <b id="haggle-patience-txt" style="color:var(--green)">100.0%</b>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" id="haggle-patience-bar" style="width:100%;"></div></div>
+      <div id="haggle-dialog-msg" style="margin-top:8px; font-style:italic; color:#e2e8f0; min-height:36px;">
+        «Номер ценный. За сколько готов забрать прямо сейчас?»
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+      <button class="btn-sec" onclick="makeHaggleStep(0.92)">Сбить -8.0%<br><small style="color:var(--green)">Мягко</small></button>
+      <button class="btn-sec" onclick="makeHaggleStep(0.82)">Сбить -18.0%<br><small style="color:var(--gold)">Уверенно</small></button>
+      <button class="btn-sec" onclick="makeHaggleStep(0.68)">Сбить -32.0%<br><small style="color:var(--red)">Нагло (Риск)</small></button>
+    </div>
+    <button class="btn-buyout" id="haggle-accept-btn" onclick="acceptCurrentHagglePrice()">🤝 Ударить по рукам и выкупить за 0 ₽</button>
+  </div>
+</div>
+
+<!-- MODAL 3: REAL MONEY PAYMENT SIMULATOR -->
+<div class="modal-backdrop" id="payment-modal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>💳 Безопасная оплата заказа</h3>
+      <button class="btn-sec" onclick="closePaymentModal()">✕</button>
+    </div>
+    <div style="background:var(--panel-2); padding:14px; border-radius:12px; border:1px solid #06b6d4;">
+      <div style="font-size:12px; color:var(--muted);">Товар Донат-Магазина:</div>
+      <div style="font-size:17px; font-weight:900; color:#22d3ee; margin:4px 0;" id="pay-pack-title">Пакет Кристаллов</div>
+      <div style="font-size:15px; font-weight:800; color:#fff;" id="pay-pack-rub">К оплате: 99 ₽</div>
+    </div>
+    <select id="pay-method-sel">
+      <option value="sbp">📱 СБП (Система Быстрых Платежей РФ)</option>
+      <option value="mir">💳 Банковская карта МИР / Visa / Mastercard</option>
+      <option value="kz">🇰🇿 Kaspi Gold (KZT)</option>
+      <option value="by">🇧🇾 ЕРИП / Белкарт (BYN)</option>
+    </select>
+    <button class="btn-main" style="background:linear-gradient(135deg,#06b6d4,#2563eb);" onclick="confirmRealPayment()">🔒 Оплатить и получить Кристаллы</button>
+  </div>
+</div>
+
+<div id="toast">Уведомление</div>
+
+<script>
+/* ======================= SOUND ENGINE ======================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function playTone(freq = 120, type = 'triangle', dur = 0.15, vol = 0.25) {
+  if (state.settings && !state.settings.sound) return;
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + dur);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur + 0.02);
+  } catch(e) {}
+}
+
+/* ======================= CATALOGS & RARITY PATIENCE / MARKUP ======================= */
+// Notice initPatience decreases as rarity increases!
+const RARITIES = [
+  { id: 0, name: 'ОБЫЧНЫЙ', color: '#9ca3af', minPrice: 0, maxMarkup: 25, initPatience: 100.0, drainMult: 1.0 },
+  { id: 1, name: 'НЕОБЫЧНЫЙ', color: '#60a5fa', minPrice: 2500, maxMarkup: 40, initPatience: 85.0, drainMult: 1.2 },
+  { id: 2, name: 'РЕДКИЙ', color: '#818cf8', minPrice: 12000, maxMarkup: 65, initPatience: 72.0, drainMult: 1.45 },
+  { id: 3, name: 'ЭПИЧЕСКИЙ', color: '#c084fc', minPrice: 55000, maxMarkup: 90, initPatience: 58.0, drainMult: 1.75 },
+  { id: 4, name: 'ЛЕГЕНДАРНЫЙ', color: '#e879f9', minPrice: 250000, maxMarkup: 120, initPatience: 45.0, drainMult: 2.1 },
+  { id: 5, name: 'МИФИЧЕСКИЙ', color: '#fb7185', minPrice: 1200000, maxMarkup: 160, initPatience: 35.0, drainMult: 2.5 },
+  { id: 6, name: 'СЕКРЕТНЫЙ', color: '#fbbf24', minPrice: 5000000, maxMarkup: 220, initPatience: 25.0, drainMult: 3.0 }
+];
+
+const REGIONS = {
+  RU: [
+    { code: '77', name: 'Москва', mult: 3, tag: 'РЕГИОН 77' },
+    { code: '777', name: 'Москва', mult: 3.5, tag: 'РЕГИОН 777' },
+    { code: '97', name: 'Москва', mult: 2.5, tag: 'РЕГИОН 97' },
+    { code: '78', name: 'Санкт-Петербург', mult: 2.4, tag: 'РЕГИОН 78' },
+    { code: '95', name: 'Чеченская Респ.', mult: 2.5, tag: 'РЕГИОН 95' },
+    { code: '23', name: 'Краснодарский край', mult: 1.4, tag: 'РЕГИОН 23' },
+    { code: '16', name: 'Татарстан', mult: 1.3, tag: 'РЕГИОН 16' },
+    { code: '50', name: 'Подмосковье', mult: 1.2, tag: 'РЕГИОН 50' },
+    { code: '66', name: 'Екатеринбург', mult: 1.2, tag: 'РЕГИОН 66' }
+  ],
+  BY: [
+    { code: '7', name: 'Минск', mult: 3, tag: 'РЕГИОН 7 (МИНСК)' },
+    { code: '5', name: 'Минская обл.', mult: 1.6, tag: 'РЕГИОН 5' },
+    { code: '1', name: 'Брест', mult: 1.1, tag: 'РЕГИОН 1' }
+  ],
+  KZ: [
+    { code: '01', name: 'Астана', mult: 3, tag: 'РЕГИОН 01 (АСТАНА)' },
+    { code: '02', name: 'Алматы', mult: 3, tag: 'РЕГИОН 02 (АЛМАТЫ)' },
+    { code: '17', name: 'Шымкент', mult: 1.5, tag: 'РЕГИОН 17' }
+  ]
+};
+
+// REAL ESTATE GRANTS NON-STACKING CAR SLOTS!
+const HOMES_CATALOG = [
+  { id: 'gar_box', name: 'Железный Гараж в ГСК', cost: 10000, slots: 8, carSlots: 1, prestige: 'Начинающий' },
+  { id: 'studio', name: 'Квартира-студия с паркингом', cost: 95000, slots: 15, carSlots: 2, prestige: 'Местный перекуп' },
+  { id: 'loft', name: 'Апартаменты в Сити', cost: 650000, slots: 25, carSlots: 4, prestige: 'Авторитетный дилер' },
+  { id: 'mansion', name: 'Особняк в Барвихе', cost: 5500000, slots: 45, carSlots: 7, prestige: 'Магнат Госномеров' },
+  { id: 'tower', name: 'Пентхаус Империи', cost: 35000000, slots: 90, carSlots: 10, prestige: 'Король СНГ' }
+];
+
+const CARS_CATALOG = [
+  { id: 'vaz2107', name: 'ВАЗ-2107 «Боевая Классика»', cost: 18000, income: 12, img: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=700&q=80' },
+  { id: 'priora', name: 'Lada Priora Black Edition', cost: 55000, income: 38, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=700&q=80' },
+  { id: 'kiario', name: 'Kia Rio Городской Седан', cost: 140000, income: 95, img: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=700&q=80' },
+  { id: 'camry35', name: 'Toyota Camry 3.5 V6 Executive', cost: 420000, income: 290, img: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=700&q=80' },
+  { id: 'bmwm5', name: 'BMW M5 F90 Competition', cost: 1650000, income: 1150, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=700&q=80' },
+  { id: 'merce63', name: 'Mercedes-AMG E63s 4MATIC+', cost: 2900000, income: 2100, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=700&q=80' },
+  { id: 'porsche911', name: 'Porsche 911 Turbo S', cost: 6500000, income: 4800, img: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=700&q=80' },
+  { id: 'gelik', name: 'Mercedes-AMG G63 «Гелик»', cost: 14000000, income: 10500, img: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=700&q=80' },
+  { id: 'urus', name: 'Lamborghini Urus Performante', cost: 28000000, income: 22000, img: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=700&q=80' },
+  { id: 'chiron', name: 'Bugatti Chiron Pur Sport', cost: 85000000, income: 72000, img: 'https://images.unsplash.com/photo-1566008885218-90abf9200ddb?auto=format&fit=crop&w=700&q=80' }
+];
+
+const BIZ_CATALOG = [
+  { id: 'shino', name: 'Вагончик Шиномонтажа', cost: 12000, income: 15, desc: 'Открывает схему отмыва «Шиномонтаж» (до 8 000 ₽)' },
+  { id: 'wash', name: 'Автомойка 24/7', cost: 65000, income: 80, desc: 'Открывает схему отмыва «Касса Автомойки» (до 35 000 ₽)' },
+  { id: 'stamp', name: 'Цех Дубликатов Госномеров', cost: 280000, income: 340, desc: 'Открывает схему отмыва «Госзаказ пластин» (до 120 000 ₽)' },
+  { id: 'tuning', name: 'Детейлинг и Кузовной Цех', cost: 1200000, income: 1450, desc: 'Открывает схему отмыва «VIP-Тюнинг» (до 450 000 ₽)' },
+  { id: 'dealer', name: 'Премиум Автохолдинг', cost: 9500000, income: 11500, desc: 'Открывает «Международный Холдинг» (до 2 500 000 ₽)' }
+];
+
+// LAUNDERING SCHEMES UNLOCKED BY BUSINESSES
+const LAUNDER_SCHEMES = [
+  { id: 'street_l', reqBiz: null, name: 'Уличный меняла (Базовый)', maxAmt: 2000, durationSec: 10, desc: 'Доступно без бизнеса, но лимит всего 2 000 ₽' },
+  { id: 'shino_l', reqBiz: 'shino', name: 'Чеки Шиномонтажа', maxAmt: 8000, durationSec: 9, desc: 'Требуется предприятие «Вагончик Шиномонтажа»' },
+  { id: 'wash_l', reqBiz: 'wash', name: 'Касса Автомойки 24/7', maxAmt: 35000, durationSec: 12, desc: 'Требуется предприятие «Автомойка 24/7»' },
+  { id: 'stamp_l', reqBiz: 'stamp', name: 'Накладные Цеха Дубликатов', maxAmt: 120000, durationSec: 15, desc: 'Требуется «Цех Дубликатов Госномеров»' },
+  { id: 'tuning_l', reqBiz: 'tuning', name: 'Авансы Кузовного Детейлинга', maxAmt: 450000, durationSec: 18, desc: 'Требуется «Детейлинг и Кузовной Цех»' },
+  { id: 'dealer_l', reqBiz: 'dealer', name: 'Контракты Премиум Автохолдинга', maxAmt: 2500000, durationSec: 22, desc: 'Требуется «Премиум Автохолдинг»' }
+];
+
+const SKILLS_CONFIG = [
+  { id: 'mreo_luck', name: 'Связи в МРЭО', max: 25, desc: 'Повышает шанс выпадения редких букв и одинаковых цифр (+12.0% к удаче за ур.)' },
+  { id: 'haggle_master', name: 'Гений Переговоров и Торга', max: 25, desc: 'Повышает макс. % наценки (+2.0% за ур.), снижает риск срыва сделки и потерю терпения при торге' },
+  { id: 'tax_cut', name: 'Налоговый Оптимизатор', max: 20, desc: 'Снижает госналог на продажу номеров И налог на прибыль Предприятий на 1.5% за уровень (с 35.0% до 5.0%)' },
+  { id: 'nimble_hands', name: 'Ловкие Пальцы', max: 20, desc: 'Расширяет зелёную зону открутки болтов и замедляет бегунок при ночной скрутке' },
+  { id: 'restorer', name: 'Мастер Реставрации', max: 20, desc: 'Снижает стоимость ремонта битых номеров «После ДТП» и госпошлину выкупа в МРЭО' },
+  { id: 'launder_pro', name: 'Теневой Прачка', max: 20, desc: 'Снижает комиссию отмыва на 1.0% и риск облавы ОБЭП на чёрном рынке на 0.8% за уровень' }
+];
+
+const ACHIEVEMENTS_CONFIG = [
+  { id: 'ach_roll_1', title: 'Первая прокрутка в МРЭО', rewardGems: 15, check: (s) => s.totalRolls >= 1 },
+  { id: 'ach_roll_25', title: 'Опытный очередник (25 прокруток)', rewardGems: 35, check: (s) => s.totalRolls >= 25 },
+  { id: 'ach_home_1', title: 'Собственная крыша (Купить недвижимость)', rewardGems: 25, check: (s) => s.homesOwned.length >= 1 },
+  { id: 'ach_car_1', title: 'Первый автомобиль в гараже', rewardGems: 30, check: (s) => Object.keys(s.carsOwned).length >= 1 },
+  { id: 'ach_biz_1', title: 'Предприниматель (Открыть бизнес)', rewardGems: 25, check: (s) => Object.keys(s.bizOwned).length >= 1 },
+  { id: 'ach_trade_5', title: 'Акула Переговоров (5 сделок / аукционов)', rewardGems: 45, check: (s) => (s.tradesCompleted + s.auctionSoldCount) >= 5 },
+  { id: 'ach_mill_1', title: 'Миллионер Госномеров (Капитал 1 000 000 ₽)', rewardGems: 100, check: (s) => getNetWorth() >= 1000000 }
+];
+
+const DONATE_PACKS = [
+  { id: 'pack1', name: '💎 Пакет «Старт Перекупа»', gems: 100, bonus: 0, rub: 99, tag: 'Популярный старт' },
+  { id: 'pack2', name: '💎 Пакет «Инспектор МРЭО»', gems: 500, bonus: 75, rub: 399, tag: '+15.0% Бонус' },
+  { id: 'pack3', name: '💎 Пакет «Полковник Спецсерий»', gems: 1500, bonus: 350, rub: 899, tag: 'Хит продаж' },
+  { id: 'pack4', name: '💎 Сундук «Олигарх СНГ»', gems: 5000, bonus: 1800, rub: 2490, tag: 'Выгода +36.0%' }
+];
+
+const DONATE_EXCHANGE = [
+  { gems: 15, cleanRub: 12000, title: '💵 Кошелёк Наличных', bonusText: 'Курс: 800 ₽ за 1 💎' },
+  { gems: 60, cleanRub: 55000, title: '💼 Дипломат Рублей', bonusText: 'Выгода +14.6%' },
+  { gems: 250, cleanRub: 260000, title: '🏦 Банковский Сейф', bonusText: 'Выгода +30.0%' },
+  { gems: 1000, cleanRub: 1250000, title: '🚛 Инкассаторский Броневик', bonusText: 'VIP курс: 1 250 ₽ за 1 💎' }
+];
+
+const CASES_CONFIG = [
+  { id: 'street', name: '📦 Бардачок Перекупа', cost: 1800, currency: 'clean', desc: 'Районные номера с шансом на зеркалки и сотни.', chances: [68.0, 22.0, 7.5, 2.0, 0.4, 0.1, 0.0] },
+  { id: 'mreo_arch', name: '🗄️ Секретный Архив МРЭО', cost: 14000, currency: 'clean', desc: 'Изъятые серии. Шанс на три одинаковые буквы и столичный регион.', chances: [25.0, 38.0, 22.0, 10.5, 3.5, 0.8, 0.2] },
+  { id: 'fso_box', name: '🚨 Спецконтейнер ФСО', cost: 85000, currency: 'clean', desc: 'Правительственные резервы: АМР, ЕКХ, ССС и 001-009.', chances: [0.0, 18.0, 36.0, 28.0, 13.0, 4.2, 0.8] },
+  { id: 'oligarch', name: '👑 Золотой Кейс Рублёвки', cost: 40, currency: 'gem', desc: 'Эксклюзив за кристаллы! Высокий шанс на 777 и Полный Комплект!', chances: [0.0, 0.0, 25.0, 38.0, 24.0, 10.0, 3.0] }
+];
+
+/* ======================= STATE ======================= */
+let state = {
+  playerId: String(Math.floor(100000 + Math.random() * 899999)),
+  nickname: 'Охотник_777',
+  avatar: '😎',
+  money: 3000,
+  dirtyMoney: 0,
+  gems: 30,
+  xp: 0,
+  level: 1,
+  skillPoints: 1,
+  skills: { mreo_luck: 0, haggle_master: 0, tax_cut: 0, nimble_hands: 0, restorer: 0, launder_pro: 0 },
+  serialCounter: 2708,
+  selectedCountry: 'RU',
+  totalRolls: 0,
+  bestPlatePrice: 0,
+  bestPlateStr: '—',
+  blackMarketSuccess: 0,
+  blackMarketCaught: 0,
+  auctionSoldCount: 0,
+  tradesCompleted: 0,
+  claimedAchievements: [],
+  inventory: [],
+  pendingRolledPlate: null,
+  myAuctionListings: [],
+  friends: [
+    { id: '777001', name: 'Руслан_АМР', lvl: 16, status: 'Онлайн · На аукционе' },
+    { id: '890412', name: 'Дима_Перекуп', lvl: 9, status: 'Онлайн · Ищет номера' },
+    { id: '102944', name: 'Алихан_01KZ', lvl: 24, status: 'В МРЭО Астаны' }
+  ],
+  settings: { sound: true, fastRoll: false },
+  carsOwned: {},
+  bizOwned: {},
+  homesOwned: [],
+  clan: null, // { tag, name, level, members: [{id, name, role}] }
+  auctionEndTime: Date.now() + 300000,
+  launderJob: null
+};
+
+try {
+  const saved = localStorage.getItem('gosnomer_empire_v5');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    state = Object.assign(state, parsed);
+    state.skills = Object.assign({ mreo_luck: 0, haggle_master: 0, tax_cut: 0, nimble_hands: 0, restorer: 0, launder_pro: 0 }, parsed.skills || {});
+    state.settings = Object.assign({ sound: true, fastRoll: false }, parsed.settings || {});
+    state.myAuctionListings = parsed.myAuctionListings || [];
+    state.claimedAchievements = parsed.claimedAchievements || [];
+    if (state.clan && !state.clan.members) {
+      state.clan.members = [{ id: state.playerId, name: state.nickname, role: 'Лидер' }];
+    }
+  }
+} catch(e) {}
+
+function saveGame() {
+  try { localStorage.setItem('gosnomer_empire_v5', JSON.stringify(state)); } catch(e) {}
+}
+
+/* ======================= CORE FORMULAS & TENTH-PERCENT ROUNDING ======================= */
+function fmt(num) { return Math.round(num).toLocaleString('ru-RU') + ' ₽'; }
+function fmtPct(val) { return Number(val).toFixed(1) + '%'; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+function getXpNeeded(lvl) { return Math.round(95 * Math.pow(1.30, lvl - 1)); }
+
+function addXp(amount) {
+  state.xp += amount;
+  let needed = getXpNeeded(state.level);
+  while (state.xp >= needed) {
+    state.xp -= needed;
+    state.level++;
+    state.skillPoints++;
+    // AWARD 50 DIAMONDS EVERY 10 LEVELS!
+    if (state.level % 10 === 0) {
+      state.gems += 50;
+      showToast(`🎉 ЮБИЛЕЙНЫЙ УРОВЕНЬ ${state.level}! Награда: +50 💎 Кристаллов и +1 Очко навыков!`);
+    } else {
+      showToast(`🎉 НОВЫЙ УРОВЕНЬ ${state.level}! Получено +1 Очко навыков!`);
+    }
+    needed = getXpNeeded(state.level);
+  }
+  updateUI();
+}
+
+function getTaxRate() {
+  return Math.max(0.05, 0.35 - (state.skills.tax_cut || 0) * 0.015);
+}
+
+function getBlackMarketStingChance() {
+  return Math.max(0.05, 0.22 - (state.skills.launder_pro || 0) * 0.008);
+}
+
+function getLaunderFee() {
+  return Math.max(0.05, 0.25 - (state.skills.launder_pro || 0) * 0.01);
+}
+
+function getRestoreDiscount() {
+  return Math.max(0.10, 0.45 - (state.skills.restorer || 0) * 0.017);
+}
+
+function getBuyoutFeeRate() {
+  return Math.max(0.10, 0.20 - (state.skills.restorer || 0) * 0.005);
+}
+
+function getMaxMarkupForPlate(plate) {
+  if (!plate) return 25.0;
+  const baseMax = RARITIES[plate.rarity].maxMarkup;
+  const skillBonus = (state.skills.haggle_master || 0) * 2.0;
+  return +(baseMax + skillBonus).toFixed(1);
+}
+
+function calcSaleSuccessProbability(plate, markupPct, isFriend = false) {
+  if (!plate) return 50.0;
+  const maxM = getMaxMarkupForPlate(plate);
+  const skill = state.skills.haggle_master || 0;
+  if (markupPct <= 0) {
+    return +Math.min(98.5, 90.0 + Math.abs(markupPct) * 0.4 + (isFriend ? 5.0 : 0)).toFixed(1);
+  }
+  const ratio = Math.min(1, markupPct / maxM);
+  let baseProb = 88.0 - Math.pow(ratio, 1.35) * 76.0;
+  baseProb += skill * 1.1;
+  if (isFriend) baseProb += 10.0;
+  return +Math.max(5.0, Math.min(96.5, baseProb)).toFixed(1);
+}
+
+function getMaxInventory() {
+  let slots = 15;
+  state.homesOwned.forEach(id => {
+    const h = HOMES_CATALOG.find(x => x.id === id);
+    if (h) slots += h.slots;
+  });
+  return slots;
+}
+
+// NON-STACKING CAR SLOTS FROM REAL ESTATE!
+function getMaxCarSlots() {
+  if (state.homesOwned.length === 0) return 0;
+  let maxCarCap = 0;
+  state.homesOwned.forEach(id => {
+    const h = HOMES_CATALOG.find(x => x.id === id);
+    if (h && h.carSlots > maxCarCap) maxCarCap = h.carSlots;
+  });
+  return maxCarCap;
+}
+
+function getPlayerLuckFactor() {
+  const lvlBonus = (state.level - 1) * 0.11;
+  const skillBonus = (state.skills.mreo_luck || 0) * 0.14;
+  const clanBonus = state.clan ? (state.clan.level * 0.08 + (state.clan.members ? state.clan.members.length * 0.02 : 0)) : 0;
+  return 0.35 + lvlBonus + skillBonus + clanBonus;
+}
+
+// Business income is subject to State Tax (reduced by tax_cut skill!)
+function getPassiveIncome() {
+  let bizGross = 0;
+  for (let bId in state.bizOwned) {
+    const b = BIZ_CATALOG.find(x => x.id === bId);
+    if (b) bizGross += b.income * state.bizOwned[bId];
+  }
+  const bizNet = Math.round(bizGross * (1 - getTaxRate()));
+
+  let carIncTotal = 0;
+  for (let cId in state.carsOwned) {
+    const c = CARS_CATALOG.find(x => x.id === cId);
+    if (c) {
+      let carInc = c.income;
+      const pUid = state.carsOwned[cId].plateUid;
+      if (pUid) {
+        const plate = state.inventory.find(p => p.uid === pUid);
+        if (plate) carInc += Math.floor(plate.price * 0.0015);
+      }
+      carIncTotal += carInc;
+    }
+  }
+  let total = bizNet + carIncTotal;
+  if (state.clan) {
+    const memberBoost = (state.clan.members ? state.clan.members.length : 1) * 0.02;
+    total = Math.floor(total * (1 + state.clan.level * 0.05 + memberBoost));
+  }
+  return total;
+}
+
+function getNetWorth() {
+  let nw = state.money + state.dirtyMoney;
+  state.inventory.forEach(p => nw += p.price);
+  state.myAuctionListings.forEach(l => nw += l.plate.price);
+  for (let cId in state.carsOwned) {
+    const c = CARS_CATALOG.find(x => x.id === cId);
+    if (c) nw += c.cost;
+  }
+  for (let bId in state.bizOwned) {
+    const b = BIZ_CATALOG.find(x => x.id === bId);
+    if (b) nw += b.cost * state.bizOwned[bId];
+  }
+  state.homesOwned.forEach(id => {
+    const h = HOMES_CATALOG.find(x => x.id === id);
+    if (h) nw += h.cost;
+  });
+  return nw;
+}
+
+/* ======================= PLATE GENERATOR ======================= */
+const LETTERS_RU = ['А','В','Е','К','М','Н','О','Р','С','Т','У','Х'];
+
+function generatePlateData(country = 'RU', source = 'gai', forcedRarity = null) {
+  state.serialCounter++;
+  const luck = getPlayerLuckFactor() * (source === 'vip' ? 2.8 : 1.0);
+  const regList = REGIONS[country];
+  let regObj = regList[Math.floor(Math.random() * regList.length)];
+  if (source === 'steal' && Math.random() < 0.78) {
+    regObj = regList[regList.length - 1];
+  }
+
+  let d1, d2, d3, l1, l2, l3;
+
+  if (forcedRarity !== null) {
+    if (forcedRarity >= 6) {
+      d1 = d2 = d3 = '7'; l1 = l2 = l3 = ['С','А','О','Х'][Math.floor(Math.random()*4)]; regObj = regList[0];
+    } else if (forcedRarity === 5) {
+      d1 = d2 = d3 = ['7','9','8','1'][Math.floor(Math.random()*4)];
+      const sp = [['А','М','Р'],['Е','К','Х'],['С','С','С']][Math.floor(Math.random()*3)];
+      l1 = sp[0]; l2 = sp[1]; l3 = sp[2];
+    } else if (forcedRarity === 4) {
+      d1 = d2 = d3 = ['1','5','8','9'][Math.floor(Math.random()*4)];
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else if (forcedRarity === 3) {
+      d1 = '0'; d2 = '0'; d3 = String(Math.floor(Math.random()*9)+1);
+      l1 = l2 = l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else if (forcedRarity === 2) {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = '0'; d3 = '0';
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = l1;
+    } else if (forcedRarity === 1) {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*10)); d3 = d1;
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*9)+1); d3 = String((+d1 + 3) % 10);
+      l1 = 'А'; l2 = 'К'; l3 = 'Р';
+    }
+  } else if (source === 'steal') {
+    const lvlScale = Math.min(3.5, 1 + (state.level - 1) * 0.15);
+    const r = Math.random() * 100;
+    if (r < 0.08 * lvlScale) {
+      d1 = d2 = d3 = ['7','8','9'][Math.floor(Math.random()*3)];
+      l1 = l2 = l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else if (r < 1.2 * lvlScale) {
+      d1 = '0'; d2 = '0'; d3 = String(Math.floor(Math.random()*9)+1);
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else if (r < 14 * lvlScale) {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*10)); d3 = d1;
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*10)); d3 = String((+d1 + 2) % 10);
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = (l2 === l1) ? 'В' : LETTERS_RU[Math.floor(Math.random()*12)];
+    }
+  } else {
+    const r = Math.random() * 100;
+    if (r < 0.35 * luck) {
+      d1 = d2 = d3 = ['7','7','9','8','1'][Math.floor(Math.random()*5)];
+    } else if (r < 1.8 * luck) {
+      d1 = '0'; d2 = '0'; d3 = String(Math.floor(Math.random()*9)+1);
+    } else if (r < 5.5 * luck) {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = '0'; d3 = '0';
+    } else if (r < 16 * luck) {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*10)); d3 = d1;
+    } else {
+      d1 = String(Math.floor(Math.random()*9)+1); d2 = String(Math.floor(Math.random()*10)); d3 = String((+d1 + 1 + Math.floor(Math.random()*7)) % 10);
+    }
+
+    const lr = Math.random() * 100;
+    if (lr < 0.6 * luck) {
+      l1 = l2 = l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+    } else if (lr < 1.5 * luck) {
+      const sp = [['А','М','Р'],['Е','К','Х'],['В','О','Р']][Math.floor(Math.random()*3)];
+      l1 = sp[0]; l2 = sp[1]; l3 = sp[2];
+    } else {
+      l1 = LETTERS_RU[Math.floor(Math.random()*12)]; l2 = LETTERS_RU[Math.floor(Math.random()*12)]; l3 = LETTERS_RU[Math.floor(Math.random()*12)];
+      if (l1 === l2 && l2 === l3 && Math.random() > 0.1 * luck) l3 = 'К';
+    }
+  }
+
+  const digits = d1 + d2 + d3;
+  const letters = l1 + l2 + l3;
+
+  let wear = +(Math.random()).toFixed(4);
+  if (source === 'scrap') wear = +(0.65 + Math.random() * 0.34).toFixed(4);
+  const isCrashed = wear > 0.62;
+  const crashNum = Math.floor(Math.random() * 900) + 100;
+
+  let conditionName = 'С завода · ГОСТ';
+  let wearMult = 1.0;
+  if (isCrashed) {
+    conditionName = `После ДТП · #${crashNum}`;
+    wearMult = 0.6;
+  } else if (wear < 0.15) {
+    conditionName = 'Идеал · Под стеклом';
+    wearMult = 1.25;
+  }
+
+  const mods = [];
+  let basePrice = source === 'steal' ? 420 : 650;
+
+  if (isCrashed) {
+    mods.push({ label: `ПОСЛЕ ДТП #${crashNum} · ИЗНОС ${wear.toString().replace('.',',')}`, mult: 0.6, color: '#a855f7' });
+  } else {
+    mods.push({ label: `${conditionName.toUpperCase()} · ИЗНОС ${wear.toString().replace('.',',')}`, mult: wearMult, color: '#60a5fa' });
+  }
+
+  if (d1 === d2 && d2 === d3) {
+    if (d1 === '7') mods.push({ label: 'ТРИ СЕМЁРКИ', mult: 150, color: '#60a5fa' });
+    else mods.push({ label: `ТРИ ОДИНАКОВЫЕ (${digits})`, mult: 55, color: '#60a5fa' });
+  } else if (d1 === '0' && d2 === '0') {
+    mods.push({ label: `ПЕРВАЯ ДЕСЯТКА (${digits})`, mult: d3 === '1' ? 45 : 18, color: '#60a5fa' });
+  } else if (d2 === '0' && d3 === '0') {
+    mods.push({ label: `РОВНАЯ СОТНЯ (${digits})`, mult: 9, color: '#60a5fa' });
+  } else if (d1 === d3) {
+    mods.push({ label: `ЗЕРКАЛЬНЫЕ ЦИФРЫ (${digits})`, mult: 3.5, color: '#60a5fa' });
+  }
+
+  if (l1 === l2 && l2 === l3) {
+    mods.push({ label: `СЕРИЯ ${letters}`, mult: 25, color: '#a855f7' });
+  } else if (letters === 'АМР' || letters === 'ЕКХ') {
+    mods.push({ label: `СПЕЦСЕРИЯ ${letters}`, mult: 30, color: '#ec4899' });
+  } else if (letters === 'ВОР' || letters === 'ХАМ') {
+    mods.push({ label: `ДЕРЗКАЯ СЕРИЯ ${letters}`, mult: 8, color: '#a855f7' });
+  }
+
+  if (regObj.mult >= 2.4 && mods.length > 1) {
+    mods.push({ label: regObj.tag, mult: regObj.mult, color: '#ec4899' });
+  }
+
+  const hasTopDigits = (d1 === d2 && d2 === d3) || (d1 === '0' && d2 === '0' && d3 === '1');
+  const hasTopLetters = (l1 === l2 && l2 === l3) || letters === 'АМР' || letters === 'ЕКХ';
+  if (hasTopDigits && hasTopLetters) {
+    mods.push({ label: 'ПОЛНЫЙ КОМПЛЕКТ', mult: 15, color: '#f43f5e' });
+  }
+
+  let runningPrice = basePrice;
+  const stepPrices = [];
+  mods.forEach(m => {
+    runningPrice = Math.round(runningPrice * m.mult);
+    stepPrices.push(runningPrice);
+  });
+
+  if (source === 'steal' && runningPrice > 495000) {
+    runningPrice = 485000;
+    stepPrices[stepPrices.length - 1] = runningPrice;
+  }
+
+  let finalRarity = RARITIES[0];
+  for (let i = RARITIES.length - 1; i >= 0; i--) {
+    if (runningPrice >= RARITIES[i].minPrice) { finalRarity = RARITIES[i]; break; }
+  }
+
+  const chanceText = runningPrice >= 5000000
+    ? 'шанс 1 из 372 млрд'
+    : `шанс 1 из ${(Math.max(8, Math.round(runningPrice / 35))).toLocaleString('ru-RU')}`;
+
+  return {
+    uid: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    serial: state.serialCounter,
+    country, digits, letters, l1, l2, l3,
+    regionCode: regObj.code,
+    regionName: regObj.name,
+    conditionName, wear, isCrashed,
+    mods, stepPrices,
+    price: runningPrice,
+    rarity: finalRarity.id,
+    chanceText
+  };
+}
+
+/* ======================= PLATE RENDERING & ROLL BUYOUT ======================= */
+function renderPlateInsideBox(plate) {
+  const box = document.getElementById('plate-visual');
+  const main = document.getElementById('plate-main-content');
+  const reg = document.getElementById('plate-region-content');
+  const scratches = document.getElementById('plate-scratches');
+
+  box.classList.toggle('crashed', plate.isCrashed);
+  scratches.style.opacity = plate.wear > 0.35 ? Math.min(0.9, plate.wear) : 0;
+
+  if (plate.country === 'RU') {
+    main.innerHTML = `<span class="let">${plate.l1.toLowerCase()}</span><span class="dig">${plate.digits}</span><span class="let">${(plate.l2+plate.l3).toLowerCase()}</span>`;
+    reg.style.display = 'flex';
+    reg.innerHTML = `<div class="plate-region-num">${plate.regionCode}</div><div class="plate-country-row">RUS <span class="flag-icon flag-rus"></span></div>`;
+  } else if (plate.country === 'BY') {
+    main.innerHTML = `<span class="flag-icon flag-blr" style="margin-right:6px;"></span><span class="dig" style="font-size:33px">${plate.digits}${plate.digits[0]}</span><span class="let upper">${plate.l1}${plate.l2}-${plate.regionCode}</span>`;
+    reg.style.display = 'none';
+  } else {
+    main.innerHTML = `<div class="kz-flag-left"><span class="flag-icon flag-kaz"></span>KZ</div><span class="dig" style="font-size:35px">${plate.digits}</span><span class="let upper" style="font-size:25px">${plate.letters}</span>`;
+    reg.style.display = 'flex';
+    reg.innerHTML = `<div class="plate-region-num">${plate.regionCode}</div>`;
+  }
+}
+
+function formatPlateString(p) {
+  if (p.country === 'RU') return `${p.l1}${p.digits}${p.l2}${p.l3} ${p.regionCode}`;
+  if (p.country === 'BY') return `${p.digits}${p.digits[0]} ${p.l1}${p.l2}-${p.regionCode}`;
+  return `${p.digits}${p.letters} ${p.regionCode}KZ`;
+}
+
+let isRolling = false;
+function animateNumber(el, from, to, duration = 360) {
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const val = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    el.textContent = fmt(val);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+async function playPlateReveal(plate) {
+  isRolling = true;
+  state.pendingRolledPlate = null;
+  document.getElementById('roller-buyout-box').classList.remove('show');
+  document.getElementById('btn-roll').disabled = true;
+  document.getElementById('btn-roll-vip').disabled = true;
+
+  const delayStep = (state.settings && state.settings.fastRoll) ? 150 : 440;
+
+  const card = document.getElementById('ref-card');
+  const rarityText = document.getElementById('card-rarity-text');
+  const serialEl = document.getElementById('card-serial');
+  const condEl = document.getElementById('card-condition');
+  const priceEl = document.getElementById('card-price');
+  const chanceEl = document.getElementById('card-chance');
+  const modsEl = document.getElementById('card-mods');
+
+  card.className = 'ref-card rarity-0';
+  rarityText.textContent = '• КРУТИМ';
+  rarityText.style.color = '#e5e7eb';
+  serialEl.textContent = `№ ${plate.serial.toLocaleString('ru-RU')}`;
+  condEl.textContent = 'Штамповка пластины...';
+  priceEl.textContent = '...';
+  modsEl.innerHTML = '';
+
+  for (let i = 0; i < 4; i++) {
+    const tmp = generatePlateData(plate.country, 'gai');
+    renderPlateInsideBox(tmp);
+    playTone(95, 'triangle', 0.07, 0.15);
+    await new Promise(r => setTimeout(r, 70));
+  }
+
+  renderPlateInsideBox(plate);
+  condEl.textContent = plate.conditionName;
+  chanceEl.textContent = `Регион ${plate.regionCode} · ${plate.regionName} · ${plate.chanceText}`;
+
+  let prevPrice = 400;
+  priceEl.textContent = fmt(prevPrice);
+
+  for (let i = 0; i < plate.mods.length; i++) {
+    await new Promise(r => setTimeout(r, delayStep));
+    const m = plate.mods[i];
+    const targetPrice = plate.stepPrices[i];
+
+    let stepRarity = RARITIES[0];
+    for (let rIdx = RARITIES.length - 1; rIdx >= 0; rIdx--) {
+      if (targetPrice >= RARITIES[rIdx].minPrice) { stepRarity = RARITIES[rIdx]; break; }
+    }
+
+    card.className = `ref-card rarity-${stepRarity.id} pulse`;
+    setTimeout(() => card.classList.remove('pulse'), 160);
+    rarityText.textContent = `• ${stepRarity.name}`;
+    rarityText.style.color = stepRarity.color;
+
+    const pill = document.createElement('div');
+    pill.className = 'mod-pill';
+    pill.innerHTML = `<span>${m.label}</span><span style="color:${m.color}; font-weight:900;">×${m.mult}</span>`;
+    modsEl.appendChild(pill);
+
+    playTone(65 + i * 25, i === plate.mods.length - 1 ? 'sawtooth' : 'triangle', 0.25, 0.3);
+    animateNumber(priceEl, prevPrice, targetPrice, delayStep - 40);
+    prevPrice = targetPrice;
+  }
+
+  state.totalRolls++;
+  if (plate.price > state.bestPlatePrice) {
+    state.bestPlatePrice = plate.price;
+    state.bestPlateStr = formatPlateString(plate);
+  }
+  addXp(15 + plate.rarity * 12);
+
+  state.pendingRolledPlate = plate;
+  showBuyoutWindowForRolledPlate(plate);
+
+  isRolling = false;
+  document.getElementById('btn-roll').disabled = false;
+  document.getElementById('btn-roll-vip').disabled = false;
+
+  updateUI();
+  saveGame();
+}
+
+function showBuyoutWindowForRolledPlate(plate) {
+  const box = document.getElementById('roller-buyout-box');
+  if (!plate) { box.classList.remove('show'); return; }
+
+  const buyoutFee = Math.round(plate.price * getBuyoutFeeRate());
+  const maxMarkup = getMaxMarkupForPlate(plate);
+
+  document.getElementById('buyout-max-markup-tag').textContent = `Потолок продажи: +${fmtPct(maxMarkup)}`;
+  document.getElementById('btn-buyout-keep').textContent = `📥 ВЫКУПИТЬ НОМЕР СЕБЕ НА СКЛАД (Госпошлина: ${fmt(buyoutFee)})`;
+  box.classList.add('show');
+}
+
+function buyoutRolledPlateToInventory() {
+  const plate = state.pendingRolledPlate;
+  if (!plate) return;
+  if (state.inventory.length >= getMaxInventory()) {
+    showToast('Склад переполнен! Освободите место или купите недвижимость.');
+    return;
+  }
+  const fee = Math.round(plate.price * getBuyoutFeeRate());
+  if (state.money < fee) {
+    showToast(`Не хватает чистых денег на госпошлину выкупа (${fmt(fee)})!`);
+    return;
+  }
+  state.money -= fee;
+  state.inventory.unshift(plate);
+  state.pendingRolledPlate = null;
+  document.getElementById('roller-buyout-box').classList.remove('show');
+  playTone(230, 'sine', 0.2, 0.3);
+  showToast(`📥 Номер ${formatPlateString(plate)} выкуплен и отправлен на Склад!`);
+  addXp(12);
+  updateUI();
+  saveGame();
+}
+
+function previewStateBuyoutRolledPlate() {
+  if (!state.pendingRolledPlate) return;
+  openSalePreviewModal('rolled_state', 'clean');
+}
+
+function discardRolledPlate() {
+  state.pendingRolledPlate = null;
+  document.getElementById('roller-buyout-box').classList.remove('show');
+  showToast('Вы отказались от выкупа номера.');
+}
+
+function selectCountry(c) {
+  state.selectedCountry = c;
+  ['RU','BY','KZ'].forEach(k => document.getElementById('country-' + k).classList.toggle('active', k === c));
+}
+
+function rollPlate(mode) {
+  if (isRolling) return;
+  const cost = mode === 'vip' ? 8500 : 300;
+  if (state.money < cost) {
+    showToast(`Недостаточно чистых денег (${fmt(cost)})!`);
+    return;
+  }
+  state.money -= cost;
+  updateUI();
+  const plate = generatePlateData(state.selectedCountry, mode);
+  playPlateReveal(plate);
+}
+
+/* ======================= SALE PREVIEW & CONFIRMATION MODAL (STATE / BLACK MARKET) ======================= */
+let pendingSaleContext = null; // { targetType: 'single'|'bulk'|'rolled_state', uid: null, mode: 'clean'|'dirty' }
+
+function openSalePreviewModal(targetType, mode, uid = null) {
+  pendingSaleContext = { targetType, mode, uid };
+  const modal = document.getElementById('sale-preview-modal');
+  const taxRate = getTaxRate();
+  const stingChance = getBlackMarketStingChance();
+
+  let marketTotal = 0;
+  let titleVisual = '';
+
+  if (targetType === 'rolled_state') {
+    const p = state.pendingRolledPlate;
+    if (!p) return;
+    marketTotal = Math.round(p.price * 0.65); // Instant MREO state surrender value before tax
+    titleVisual = `<div class="mini-plate ${p.isCrashed?'crashed':''}">${formatPlateString(p)}</div><div style="font-size:12px; color:var(--muted); margin-top:4px;">Мгновенный Госвыкуп из окна МРЭО (65.0% от рынка)</div>`;
+  } else if (targetType === 'single') {
+    const p = state.inventory.find(x => x.uid === uid);
+    if (!p) return;
+    marketTotal = p.price;
+    titleVisual = `<div class="mini-plate ${p.isCrashed?'crashed':''}">${formatPlateString(p)}</div>`;
+  } else if (targetType === 'bulk') {
+    const candidates = state.inventory.filter(p => {
+      const eq = Object.values(state.carsOwned).some(c => c.plateUid === p.uid);
+      return !eq && p.rarity <= 1;
+    });
+    if (candidates.length === 0) {
+      showToast('Нет свободных Обычных/Необычных номеров для массовой продажи.');
+      return;
+    }
+    candidates.forEach(p => marketTotal += p.price);
+    titleVisual = `<div class="badge" style="font-size:14px; padding:8px 14px;">Партия из ${candidates.length} номеров (Обычные / Необычные)</div>`;
+  }
+
+  document.getElementById('sp-plate-visual').innerHTML = titleVisual;
+  document.getElementById('sp-market-val').textContent = fmt(marketTotal);
+
+  if (mode === 'clean') {
+    document.getElementById('sp-channel-name').innerHTML = '<span style="color:var(--green)">🏛️ Государственный выкуп (Легально)</span>';
+    document.getElementById('sp-tax-or-risk-lbl').textContent = 'Государственный налог ФНС:';
+    document.getElementById('sp-tax-or-risk-val').textContent = '-' + fmtPct(taxRate * 100);
+    const net = Math.round(marketTotal * (1 - taxRate));
+    document.getElementById('sp-net-payout').textContent = fmt(net) + ' (Чистые)';
+    document.getElementById('sp-net-payout').style.color = 'var(--green)';
+  } else {
+    document.getElementById('sp-channel-name').innerHTML = '<span style="color:#c084fc">🕶️ Чёрный рынок (Барыгам без налога)</span>';
+    document.getElementById('sp-tax-or-risk-lbl').textContent = 'Вероятность облавы ОБЭП:';
+    document.getElementById('sp-tax-or-risk-val').textContent = fmtPct(stingChance * 100) + ' (Риск конфискации и штрафа)';
+    document.getElementById('sp-net-payout').textContent = fmt(marketTotal) + ' (В Грязный кэш)';
+    document.getElementById('sp-net-payout').style.color = '#c084fc';
+  }
+
+  modal.classList.add('show');
+}
+
+function closeSalePreviewModal() {
+  document.getElementById('sale-preview-modal').classList.remove('show');
+  pendingSaleContext = null;
+}
+
+function confirmPreviewedSale() {
+  if (!pendingSaleContext) return;
+  const { targetType, mode, uid } = pendingSaleContext;
+  closeSalePreviewModal();
+
+  if (targetType === 'rolled_state') {
+    const plate = state.pendingRolledPlate;
+    if (!plate) return;
+    const stateFastCash = Math.round(plate.price * 0.65 * (1 - getTaxRate()));
+    state.money += stateFastCash;
+    state.pendingRolledPlate = null;
+    document.getElementById('roller-buyout-box').classList.remove('show');
+    showToast(`🏛️ Номер сдан в Госвыкуп! Получено +${fmt(stateFastCash)} чистыми.`);
+    updateUI();
+    saveGame();
+  } else if (targetType === 'single') {
+    executeSinglePlateSale(uid, mode);
+  } else if (targetType === 'bulk') {
+    executeBulkPlateSale(mode);
+  }
+}
+
+function executeSinglePlateSale(uid, mode) {
+  const idx = state.inventory.findIndex(p => p.uid === uid);
+  if (idx === -1) return;
+  const plate = state.inventory[idx];
+
+  for (let cId in state.carsOwned) {
+    if (state.carsOwned[cId].plateUid === uid) state.carsOwned[cId].plateUid = null;
+  }
+
+  state.inventory.splice(idx, 1);
+
+  if (mode === 'clean') {
+    const tax = getTaxRate();
+    const net = Math.round(plate.price * (1 - tax));
+    state.money += net;
+    showToast(`🏛️ Продано государству: +${fmt(net)} (Налог ${fmtPct(tax*100)} удержан)`);
+    addXp(8);
+  } else {
+    const stingChance = getBlackMarketStingChance();
+    if (Math.random() < stingChance) {
+      state.blackMarketCaught++;
+      const fine = Math.min(state.money, Math.max(500, Math.round(plate.price * 0.20)));
+      state.money -= fine;
+      playTone(55, 'sawtooth', 0.45, 0.4);
+      showToast(`🚨 КОНТРОЛЬНАЯ ЗАКУПКА ОБЭП! Номер ${formatPlateString(plate)} конфискован, штраф ${fmt(fine)}!`);
+    } else {
+      state.blackMarketSuccess++;
+      state.dirtyMoney += plate.price;
+      showToast(`🕶️ Сделка на чёрном рынке успешна: +${fmt(plate.price)} в Грязный кэш!`);
+      addXp(14);
+    }
+  }
+
+  updateUI();
+  renderInventory();
+  saveGame();
+}
+
+function executeBulkPlateSale(mode) {
+  const candidates = state.inventory.filter(p => {
+    const eq = Object.values(state.carsOwned).some(c => c.plateUid === p.uid);
+    return !eq && p.rarity <= 1;
+  });
+  if (candidates.length === 0) return;
+
+  let totalEarned = 0, caughtCount = 0, fineTotal = 0;
+  const tax = getTaxRate();
+  const sting = getBlackMarketStingChance();
+
+  candidates.forEach(p => {
+    const idx = state.inventory.findIndex(x => x.uid === p.uid);
+    if (idx !== -1) state.inventory.splice(idx, 1);
+
+    if (mode === 'clean') {
+      totalEarned += Math.round(p.price * (1 - tax));
+    } else {
+      if (Math.random() < sting) {
+        caughtCount++;
+        const f = Math.min(state.money, Math.round(p.price * 0.15));
+        state.money -= f;
+        fineTotal += f;
+        state.blackMarketCaught++;
+      } else {
+        totalEarned += p.price;
+        state.blackMarketSuccess++;
+      }
+    }
+  });
+
+  if (mode === 'clean') {
+    state.money += totalEarned;
+    showToast(`Продано ${candidates.length} номеров легально: +${fmt(totalEarned)} чистыми!`);
+  } else {
+    state.dirtyMoney += totalEarned;
+    showToast(caughtCount > 0
+      ? `🕶️ Слито на +${fmt(totalEarned)}, но ${caughtCount} шт. перехватил ОБЭП (штраф -${fmt(fineTotal)})!`
+      : `🕶️ Все ${candidates.length} номеров успешно слиты: +${fmt(totalEarned)} грязными!`);
+  }
+  updateUI();
+  renderInventory();
+  saveGame();
+}
+
+function restorePlate(uid) {
+  const p = state.inventory.find(x => x.uid === uid);
+  if (!p || !p.isCrashed) return;
+  const cost = Math.round(p.price * getRestoreDiscount());
+  if (state.money < cost) { showToast(`Нужно ${fmt(cost)} чистых денег!`); return; }
+  state.money -= cost;
+  p.isCrashed = false;
+  p.wear = 0.012;
+  p.conditionName = 'Отреставрирован · ГОСТ';
+  p.price = Math.round(p.price * 1.95);
+  for (let i = RARITIES.length - 1; i >= 0; i--) {
+    if (p.price >= RARITIES[i].minPrice) { p.rarity = RARITIES[i].id; break; }
+  }
+  addXp(25);
+  showToast(`Номер отреставрирован! Новая оценка: ${fmt(p.price)}`);
+  updateUI();
+  renderInventory();
+  saveGame();
+}
+
+function renderInventory() {
+  const grid = document.getElementById('inventory-grid');
+  if (!grid) return;
+  const tax = getTaxRate();
+  const sting = getBlackMarketStingChance();
+  document.getElementById('inv-tax-txt').textContent = fmtPct(tax * 100);
+  document.getElementById('inv-sting-txt').textContent = fmtPct(sting * 100);
+
+  grid.innerHTML = '';
+  if (state.inventory.length === 0) {
+    grid.innerHTML = '<p style="color:var(--muted)">Склад пуст. Выкупайте номера в МРЭО, с рук у водителей или открывайте кейсы!</p>';
+    return;
+  }
+
+  state.inventory.forEach(p => {
+    const r = RARITIES[p.rarity];
+    const maxM = getMaxMarkupForPlate(p);
+    const cleanNet = Math.round(p.price * (1 - tax));
+    const restCost = Math.round(p.price * getRestoreDiscount());
+    const eqCar = Object.keys(state.carsOwned).find(k => state.carsOwned[k].plateUid === p.uid);
+
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.style.borderColor = r.color;
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span class="badge" style="color:${r.color}">• ${r.name}</span>
+          <span class="badge" style="color:var(--gold)">Макс. наценка: +${fmtPct(maxM)}</span>
+        </div>
+        <div class="mini-plate ${p.isCrashed ? 'crashed' : ''}">${formatPlateString(p)}</div>
+        <div style="font-size:18px; font-weight:900; margin-top:8px;">Рынок: ${fmt(p.price)}</div>
+        <p style="font-size:12px; color:var(--muted); margin-top:2px;">
+          В Гос (-${fmtPct(tax*100)}): <b style="color:var(--green)">${fmt(cleanNet)}</b><br>
+          Потолок с наценкой (+${fmtPct(maxM)}): <b style="color:var(--gold)">${fmt(Math.round(p.price*(1+maxM/100)))}</b>
+        </p>
+        ${eqCar ? `<div class="badge" style="margin-top:6px; color:var(--green); border-color:var(--green)">Установлен на авто</div>` : ''}
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="btn-sec sell" style="flex:1" onclick="openSalePreviewModal('single','clean','${p.uid}')">💰 Гос</button>
+        <button class="btn-sec dirty" style="flex:1" onclick="openSalePreviewModal('single','dirty','${p.uid}')">🕶️ Чёрный (${fmtPct(sting*100)})</button>
+        <button class="btn-sec auc" style="width:100%" onclick="openListAuctionModal('${p.uid}')">🔨 На Аукцион (до +${fmtPct(maxM)})</button>
+        ${p.isCrashed ? `<button class="btn-sec" style="width:100%; border-color:var(--gold); color:var(--gold);" onclick="restorePlate('${p.uid}')">🔧 Выпрямить (${fmt(restCost)})</button>` : ''}
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+/* ======================= SECONDHAND MARKET (PATIENCE DEPENDS ON RARITY!) ======================= */
+let secondhandListings = [];
+let activeHaggleIdx = null;
+
+function switchTradeSub(sub) {
+  document.getElementById('tr-sub-hands').style.display = sub === 'hands' ? 'block' : 'none';
+  document.getElementById('tr-sub-sell').style.display = sub === 'sell' ? 'block' : 'none';
+  document.getElementById('tr-sub-btn-hands').classList.toggle('active', sub === 'hands');
+  document.getElementById('tr-sub-btn-sell').classList.toggle('active', sub === 'sell');
+  if (sub === 'hands') {
+    if (secondhandListings.length === 0) generateSecondhandMarket(true);
+    else renderSecondhandMarket();
+  } else {
+    renderTradeTab();
+  }
+}
+
+function generateSecondhandMarket(free = false) {
+  if (!free) {
+    if (state.money < 500) { showToast('Нужно 500 ₽ на поиск новых объявлений!'); return; }
+    state.money -= 500;
+  }
+  secondhandListings = [];
+  const sellers = ['Дед_На_Волге', 'Студент_На_Приоре', 'Перекуп_ТЦ', 'Таксист_Камри', 'Хозяин_Гелика', 'Коллекционер_ФСО'];
+  const countries = ['RU', 'BY', 'KZ'];
+  for (let i = 0; i < 6; i++) {
+    const c = countries[i % 3];
+    const rar = [0, 1, 2, 3, 4, 5][i];
+    const plate = generatePlateData(c, 'case', rar);
+    const rCfg = RARITIES[plate.rarity];
+    const askMult = 0.88 + Math.random() * 0.35;
+    const askPrice = Math.round(plate.price * askMult);
+    const minAccept = Math.round(plate.price * (0.52 + plate.rarity * 0.05));
+    // PATIENCE DIRECTLY DEPENDS ON RARITY (Higher rarity = Lower patience!)
+    secondhandListings.push({
+      plate,
+      seller: sellers[i],
+      askPrice,
+      minAccept,
+      patience: rCfg.initPatience,
+      maxPatience: rCfg.initPatience,
+      drainMult: rCfg.drainMult
+    });
+  }
+  renderSecondhandMarket();
+  updateUI();
+}
+
+function renderSecondhandMarket() {
+  const grid = document.getElementById('secondhand-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  secondhandListings.forEach((item, idx) => {
+    const p = item.plate;
+    const r = RARITIES[p.rarity];
+    const maxM = getMaxMarkupForPlate(p);
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span class="badge" style="color:${r.color}">• ${r.name}</span>
+          <span style="font-size:11.5px; color:var(--muted)">👤 ${item.seller}</span>
+        </div>
+        <div class="mini-plate ${p.isCrashed ? 'crashed' : ''}">${formatPlateString(p)}</div>
+        <p style="font-size:12.5px; margin-top:8px;">
+          Рыночная оценка: <b style="color:#fff">${fmt(p.price)}</b><br>
+          Потенциал перепродажи (+${fmtPct(maxM)}): <b style="color:var(--green)">до ${fmt(Math.round(p.price*(1+maxM/100)))}</b><br>
+          Терпение продавца (от редкости): <b style="color:${item.patience > 45 ? 'var(--green)' : 'var(--red)'}">${fmtPct(item.patience)}</b>
+        </p>
+      </div>
+      <div>
+        <div style="font-size:17px; font-weight:900; color:var(--gold); margin-bottom:8px;">Цена с рук: ${fmt(item.askPrice)}</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-sec sell" style="flex:1" onclick="buySecondhandDirect(${idx})">📥 Выкупить</button>
+          <button class="btn-sec auc" style="flex:1" onclick="openHaggleModal(${idx})">💬 Торговаться</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function buySecondhandDirect(idx) {
+  const item = secondhandListings[idx];
+  if (!item) return;
+  if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+  if (state.money < item.askPrice) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= item.askPrice;
+  state.inventory.unshift(item.plate);
+  secondhandListings.splice(idx, 1);
+  addXp(20);
+  showToast(`🚗 Вы выкупили номер ${formatPlateString(item.plate)} с рук!`);
+  renderSecondhandMarket();
+  updateUI();
+  saveGame();
+}
+
+function openHaggleModal(idx) {
+  activeHaggleIdx = idx;
+  const item = secondhandListings[idx];
+  if (!item) return;
+  document.getElementById('haggle-modal').classList.add('show');
+  updateHaggleModalUI(`«Редкость номера — ${RARITIES[item.plate.rarity].name}, поэтому моё стартовое терпение всего ${fmtPct(item.patience)}. Называй цену!»`);
+}
+
+function closeHaggleModal() {
+  document.getElementById('haggle-modal').classList.remove('show');
+  activeHaggleIdx = null;
+  renderSecondhandMarket();
+}
+
+function updateHaggleModalUI(msg) {
+  const item = secondhandListings[activeHaggleIdx];
+  if (!item) return;
+  document.getElementById('haggle-title').textContent = `💬 Торг с водителем: ${item.seller}`;
+  document.getElementById('haggle-plate-preview').innerHTML = `<div class="mini-plate ${item.plate.isCrashed?'crashed':''}" style="font-size:20px; padding:8px 16px;">${formatPlateString(item.plate)}</div>`;
+  document.getElementById('haggle-market-val').textContent = fmt(item.plate.price);
+  document.getElementById('haggle-ask-val').textContent = fmt(item.askPrice);
+  document.getElementById('haggle-patience-txt').textContent = fmtPct(item.patience);
+  document.getElementById('haggle-patience-bar').style.width = Math.min(100, item.patience) + '%';
+  document.getElementById('haggle-dialog-msg').textContent = msg;
+  document.getElementById('haggle-accept-btn').textContent = `🤝 Ударить по рукам и выкупить за ${fmt(item.askPrice)}`;
+}
+
+function makeHaggleStep(factor) {
+  const item = secondhandListings[activeHaggleIdx];
+  if (!item) return;
+
+  const skill = state.skills.haggle_master || 0;
+  const baseLoss = factor < 0.72 ? 32.0 : factor < 0.85 ? 19.5 : 10.5;
+  // Drain scales up with plate's rarity drainMult and scales down with haggle_master skill
+  const actualLoss = +(baseLoss * item.drainMult * Math.max(0.35, 1 - skill * 0.025)).toFixed(1);
+  item.patience = +Math.max(0, item.patience - actualLoss).toFixed(1);
+
+  if (item.patience <= 0) {
+    playTone(60, 'sawtooth', 0.3, 0.3);
+    showToast(`❌ У продавца ${item.seller} лопнуло терпение (0.0%), и он снял номер с продажи!`);
+    secondhandListings.splice(activeHaggleIdx, 1);
+    closeHaggleModal();
+    return;
+  }
+
+  const desiredPrice = Math.round(item.askPrice * factor);
+  if (desiredPrice >= item.minAccept) {
+    item.askPrice = Math.round((item.askPrice + desiredPrice) / 2);
+    playTone(210, 'sine', 0.15, 0.25);
+    updateHaggleModalUI(`«Ладно, уступлю до ${fmt(item.askPrice)}, но моё терпение уже ${fmtPct(item.patience)}!»`);
+  } else {
+    item.askPrice = Math.max(item.minAccept, Math.round(item.askPrice * 0.95));
+    playTone(110, 'triangle', 0.15, 0.25);
+    updateHaggleModalUI(`«Слишком дёшево за такой номер! Могу скинуть только до ${fmt(item.askPrice)}!»`);
+  }
+}
+
+function acceptCurrentHagglePrice() {
+  if (activeHaggleIdx === null) return;
+  const idx = activeHaggleIdx;
+  closeHaggleModal();
+  buySecondhandDirect(idx);
+}
+
+/* ======================= P2P SELL WITH TENTH-PERCENT PRECISION ======================= */
+let incomingOffers = [];
+
+function renderTradeTab() {
+  const sel = document.getElementById('trade-plate-select');
+  sel.innerHTML = '';
+  if (state.inventory.length === 0) {
+    sel.innerHTML = '<option value="">-- Склад пуст --</option>';
+  } else {
+    state.inventory.forEach(p => {
+      const maxM = getMaxMarkupForPlate(p);
+      sel.innerHTML += `<option value="${p.uid}">${formatPlateString(p)} (Рынок: ${fmt(p.price)} | Макс: +${fmtPct(maxM)})</option>`;
+    });
+  }
+
+  const fSel = document.getElementById('trade-friend-select');
+  fSel.innerHTML = '<option value="">-- Выбрать из друзей --</option>';
+  state.friends.forEach(f => {
+    fSel.innerHTML += `<option value="${f.id}">${f.name} (ID: ${f.id})</option>`;
+  });
+
+  updateTradePriceBounds();
+  if (incomingOffers.length === 0) generateIncomingBuyerOffer();
+  else renderIncomingOffers();
+}
+
+function syncTradeRecipientInput() {
+  const val = document.getElementById('trade-friend-select').value;
+  if (val) document.getElementById('trade-target-id').value = val;
+  updateTradeSliderDisplay();
+}
+
+function updateTradePriceBounds() {
+  const uid = document.getElementById('trade-plate-select').value;
+  const p = state.inventory.find(x => x.uid === uid);
+  const slider = document.getElementById('trade-markup-slider');
+  const maxLbl = document.getElementById('trade-max-label');
+  if (!p) {
+    maxLbl.textContent = '+0.0%';
+    document.getElementById('trade-final-price').textContent = '0 ₽';
+    return;
+  }
+  const maxM = getMaxMarkupForPlate(p);
+  slider.max = maxM;
+  if (parseFloat(slider.value) > maxM) slider.value = maxM;
+  maxLbl.textContent = `+${fmtPct(maxM)} (${fmt(Math.round(p.price * (1 + maxM / 100)))})`;
+  updateTradeSliderDisplay();
+}
+
+function updateTradeSliderDisplay() {
+  const uid = document.getElementById('trade-plate-select').value;
+  const p = state.inventory.find(x => x.uid === uid);
+  const pct = parseFloat(document.getElementById('trade-markup-slider').value) || 0;
+  document.getElementById('trade-markup-label').textContent = (pct >= 0 ? '+' : '') + fmtPct(pct);
+  if (!p) return;
+
+  const maxM = getMaxMarkupForPlate(p);
+  const clampedPct = Math.min(maxM, Math.max(-20, pct));
+  const finalPrice = Math.round(p.price * (1 + clampedPct / 100));
+  document.getElementById('trade-final-price').textContent = fmt(finalPrice);
+
+  const targetId = document.getElementById('trade-target-id').value.trim();
+  const isFriend = state.friends.some(f => f.id === targetId);
+  const succProb = calcSaleSuccessProbability(p, clampedPct, isFriend);
+  const failProb = +(100 - succProb).toFixed(1);
+
+  document.getElementById('trade-success-pct').textContent = fmtPct(succProb);
+  document.getElementById('trade-fail-pct').textContent = fmtPct(failProb);
+  document.getElementById('trade-prob-bar').style.width = succProb + '%';
+}
+
+function sendPlayerTradeOffer() {
+  const uid = document.getElementById('trade-plate-select').value;
+  const pIdx = state.inventory.findIndex(x => x.uid === uid);
+  if (pIdx === -1) { showToast('Выберите номер для продажи!'); return; }
+  const targetId = document.getElementById('trade-target-id').value.trim();
+  if (!targetId) { showToast('Укажите ID покупателя или выберите друга!'); return; }
+
+  const p = state.inventory[pIdx];
+  const maxM = getMaxMarkupForPlate(p);
+  const pct = Math.min(maxM, Math.max(-20, parseFloat(document.getElementById('trade-markup-slider').value) || 0));
+  const askPrice = Math.round(p.price * (1 + pct / 100));
+  const isFriend = state.friends.some(f => f.id === targetId);
+  const succProb = calcSaleSuccessProbability(p, pct, isFriend);
+
+  if (Math.random() * 100 < succProb) {
+    for (let cId in state.carsOwned) {
+      if (state.carsOwned[cId].plateUid === uid) state.carsOwned[cId].plateUid = null;
+    }
+    state.inventory.splice(pIdx, 1);
+    state.money += askPrice;
+    state.tradesCompleted++;
+    addXp(28);
+    playTone(240, 'sine', 0.25, 0.3);
+    showToast(`✅ Сделка успешна! Игрок ID:${targetId} купил номер за ${fmt(askPrice)} (+${fmtPct(pct)})!`);
+    renderTradeTab();
+    updateUI();
+    saveGame();
+  } else {
+    const counterPct = +(Math.max(-10, pct * 0.45)).toFixed(1);
+    const counterPrice = Math.round(p.price * (1 + counterPct / 100));
+    playTone(90, 'triangle', 0.2, 0.25);
+    if (confirm(`❌ Сделка на +${fmtPct(pct)} сорвалась! Покупатель ID:${targetId} предлагает встречную цену: ${fmt(counterPrice)} (${counterPct>=0?'+':''}${fmtPct(counterPct)}).\n\nСогласиться на продажу?`)) {
+      for (let cId in state.carsOwned) {
+        if (state.carsOwned[cId].plateUid === uid) state.carsOwned[cId].plateUid = null;
+      }
+      state.inventory.splice(pIdx, 1);
+      state.money += counterPrice;
+      state.tradesCompleted++;
+      addXp(18);
+      showToast(`🤝 Номер продан по встречному торгу за ${fmt(counterPrice)}!`);
+      renderTradeTab();
+      updateUI();
+      saveGame();
+    }
+  }
+}
+
+function generateIncomingBuyerOffer() {
+  incomingOffers = [];
+  if (state.inventory.length > 0) {
+    const p = state.inventory[Math.floor(Math.random() * state.inventory.length)];
+    const maxM = getMaxMarkupForPlate(p);
+    const markupPct = +(Math.random() * Math.min(55, maxM) + 5).toFixed(1);
+    const offerPrice = Math.round(p.price * (1 + markupPct / 100));
+    const buyers = [
+      { id: '777001', name: 'Руслан_АМР (Друг)' },
+      { id: '449120', name: 'Коллекционер_МСК' },
+      { id: '901233', name: 'Мажор_Алматы' }
+    ];
+    const b = buyers[Math.floor(Math.random() * buyers.length)];
+    incomingOffers.push({
+      plateUid: p.uid,
+      plateStr: formatPlateString(p),
+      marketPrice: p.price,
+      offerPrice,
+      markupPct,
+      buyerName: b.name,
+      buyerId: b.id
+    });
+  }
+  renderIncomingOffers();
+}
+
+function renderIncomingOffers() {
+  const box = document.getElementById('incoming-trades-box');
+  if (!box) return;
+  if (incomingOffers.length === 0) {
+    box.innerHTML = '<p style="font-size:12.5px; color:var(--muted);">Пока нет запросов. Нажмите «Найти клиента», когда на складе есть номера.</p>';
+    return;
+  }
+  box.innerHTML = '';
+  incomingOffers.forEach((of, idx) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--panel-2); padding:12px; border-radius:12px; border:1px solid var(--border);';
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted);">
+        <span>Покупатель: <b style="color:#fff">${of.buyerName}</b> (ID: ${of.buyerId})</span>
+        <span class="badge" style="color:var(--green)">+${fmtPct(of.markupPct)} к рынку</span>
+      </div>
+      <div style="margin:8px 0; font-size:14px;">
+        Предлагает за ваш номер <b>${of.plateStr}</b> сумму <b style="color:var(--gold)">${fmt(of.offerPrice)}</b>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-sec sell" style="flex:1" onclick="acceptIncomingOffer(${idx})">✔ Продать</button>
+        <button class="btn-sec auc" style="flex:1" onclick="counterHaggleIncomingOffer(${idx})">💬 Потребовать +15.0%</button>
+      </div>
+    `;
+    box.appendChild(div);
+  });
+}
+
+function acceptIncomingOffer(idx) {
+  const of = incomingOffers[idx];
+  if (!of) return;
+  const pIdx = state.inventory.findIndex(x => x.uid === of.plateUid);
+  if (pIdx === -1) { incomingOffers.splice(idx, 1); renderIncomingOffers(); return; }
+  for (let cId in state.carsOwned) {
+    if (state.carsOwned[cId].plateUid === of.plateUid) state.carsOwned[cId].plateUid = null;
+  }
+  state.inventory.splice(pIdx, 1);
+  state.money += of.offerPrice;
+  state.tradesCompleted++;
+  incomingOffers.splice(idx, 1);
+  addXp(25);
+  showToast(`🤝 Сделка завершена! Получено +${fmt(of.offerPrice)}!`);
+  renderTradeTab();
+  updateUI();
+  saveGame();
+}
+
+function counterHaggleIncomingOffer(idx) {
+  const of = incomingOffers[idx];
+  if (!of) return;
+  const skill = state.skills.haggle_master || 0;
+  if (Math.random() < 0.45 + skill * 0.02) {
+    of.offerPrice = Math.round(of.offerPrice * 1.15);
+    of.markupPct = +(of.markupPct + 15).toFixed(1);
+    showToast(`💬 Покупатель согласился доплатить! Новая цена: ${fmt(of.offerPrice)}`);
+    renderIncomingOffers();
+  } else {
+    incomingOffers.splice(idx, 1);
+    showToast('❌ Покупатель отказался переплачивать и ушёл!');
+    renderIncomingOffers();
+  }
+}
+
+function generateShareTradeCode() {
+  const uid = document.getElementById('trade-plate-select').value;
+  const p = state.inventory.find(x => x.uid === uid);
+  if (!p) { showToast('Выберите номер!'); return; }
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(p))));
+  prompt('Скопируйте код обмена для отправки другу:', code);
+}
+
+function redeemShareTradeCode() {
+  const raw = document.getElementById('import-trade-code-inp').value.trim();
+  if (!raw) return;
+  try {
+    const p = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if (!p || !p.digits || !p.price) throw new Error();
+    p.uid = 'p_' + Date.now() + '_imp';
+    state.inventory.unshift(p);
+    document.getElementById('import-trade-code-inp').value = '';
+    showToast(`🎁 Номер ${formatPlateString(p)} получен!`);
+    updateUI();
+    saveGame();
+  } catch(e) {
+    showToast('❌ Неверный код обмена!');
+  }
+}
+
+/* ======================= AUCTION (BIDDING SLIDER, FAST SALE, PERSISTENT LOTS) ======================= */
+let auctionLots = [];
+
+function openListAuctionModal(preselectUid = null) {
+  if (state.inventory.length === 0) {
+    showToast('На складе нет номеров для выставления на аукцион!');
+    return;
+  }
+  const modal = document.getElementById('auction-list-modal');
+  const sel = document.getElementById('modal-auc-plate-sel');
+  sel.innerHTML = '';
+  state.inventory.forEach(p => {
+    const selected = (preselectUid && p.uid === preselectUid) ? 'selected' : '';
+    const maxM = getMaxMarkupForPlate(p);
+    sel.innerHTML += `<option value="${p.uid}" ${selected}>${formatPlateString(p)} (Рынок: ${fmt(p.price)} | Макс: +${fmtPct(maxM)})</option>`;
+  });
+  modal.classList.add('show');
+  updateModalAucPrice();
+}
+
+function closeListAuctionModal() {
+  document.getElementById('auction-list-modal').classList.remove('show');
+}
+
+function updateModalAucPrice() {
+  const uid = document.getElementById('modal-auc-plate-sel').value;
+  const p = state.inventory.find(x => x.uid === uid);
+  if (!p) return;
+
+  const maxM = getMaxMarkupForPlate(p);
+  const slider = document.getElementById('modal-auc-slider');
+  slider.max = maxM;
+  if (parseFloat(slider.value) > maxM) slider.value = maxM;
+
+  const pct = Math.min(maxM, Math.max(-15, parseFloat(slider.value) || 0));
+  document.getElementById('modal-auc-pct').textContent = (pct >= 0 ? '+' : '') + fmtPct(pct);
+  document.getElementById('modal-auc-max').textContent = `+${fmtPct(maxM)} (${fmt(Math.round(p.price * (1 + maxM / 100)))})`;
+
+  const askPrice = Math.round(p.price * (1 + pct / 100));
+  document.getElementById('modal-auc-final').textContent = fmt(askPrice);
+
+  const succProb = calcSaleSuccessProbability(p, pct, false);
+  document.getElementById('modal-auc-succ').textContent = fmtPct(succProb);
+  document.getElementById('modal-auc-fail').textContent = fmtPct(100 - succProb);
+}
+
+function confirmListPlateOnAuction() {
+  const uid = document.getElementById('modal-auc-plate-sel').value;
+  const pIdx = state.inventory.findIndex(x => x.uid === uid);
+  if (pIdx === -1) return;
+
+  const p = state.inventory[pIdx];
+  const maxM = getMaxMarkupForPlate(p);
+  const pct = Math.min(maxM, Math.max(-15, parseFloat(document.getElementById('modal-auc-slider').value) || 0));
+  const askPrice = Math.round(p.price * (1 + pct / 100));
+  const succProb = calcSaleSuccessProbability(p, pct, false);
+
+  for (let cId in state.carsOwned) {
+    if (state.carsOwned[cId].plateUid === uid) state.carsOwned[cId].plateUid = null;
+  }
+
+  state.inventory.splice(pIdx, 1);
+
+  const now = Date.now();
+  const minWaitMs = 60000; // 1 min
+  const maxWaitMs = 240000; // 4 min
+  const ratio = Math.max(0, (pct + 15) / (maxM + 15));
+  const waitMs = Math.round(minWaitMs + (maxWaitMs - minWaitMs) * ratio);
+
+  state.myAuctionListings.push({
+    uid: p.uid,
+    plate: p,
+    askPrice,
+    markupPct: pct,
+    succProb,
+    listedAt: now,
+    sellAt: now + waitMs
+  });
+
+  closeListAuctionModal();
+  switchTab('auction');
+  showToast(`🔨 Лот ${formatPlateString(p)} выставлен за ${fmt(askPrice)} (Шанс: ${fmtPct(succProb)})!`);
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+// ACCELERATE ACTIVE LOT SALE ("ПРОДАТЬ БЫСТРЕЕ")
+function boostMyAuctionLotSpeed(uid, useGems = false) {
+  const item = state.myAuctionListings.find(x => x.uid === uid);
+  if (!item) return;
+  if (useGems) {
+    if (state.gems < 3) { showToast('Нужно 3 💎 для мгновенного продвижения лота!'); return; }
+    state.gems -= 3;
+    item.sellAt = Date.now() + 2000; // Sells in 2 seconds!
+    showToast('⚡ VIP-продвижение активировано! Лот завершится через 2 секунды.');
+  } else {
+    const boostCost = Math.max(300, Math.round(item.askPrice * 0.04));
+    if (state.money < boostCost) { showToast(`Нужно ${fmt(boostCost)} для рекламы лота!`); return; }
+    state.money -= boostCost;
+    item.sellAt = Math.max(Date.now() + 3000, item.sellAt - 60000); // -60 seconds
+    showToast(`⚡ Реклама оплачена (-${fmt(boostCost)})! Время продажи сокращено на 60 сек.`);
+  }
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+function cancelMyAuctionListing(uid) {
+  const idx = state.myAuctionListings.findIndex(x => x.uid === uid);
+  if (idx === -1) return;
+  const item = state.myAuctionListings[idx];
+  state.inventory.unshift(item.plate);
+  state.myAuctionListings.splice(idx, 1);
+  showToast(`Лот возвращён на склад.`);
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+function resolveMyAuctionItem(item) {
+  if (Math.random() * 100 < item.succProb) {
+    state.money += item.askPrice;
+    state.auctionSoldCount++;
+    addXp(30);
+    showToast(`🔨 УСПЕХ! Ваш лот ${formatPlateString(item.plate)} выкуплен на торгах за ${fmt(item.askPrice)} (+${fmtPct(item.markupPct)})!`);
+  } else {
+    state.inventory.unshift(item.plate);
+    showToast(`❌ Торги по лоту ${formatPlateString(item.plate)} (+${fmtPct(item.markupPct)}) не нашли покупателя! Номер возвращён на склад.`);
+  }
+}
+
+// PERSISTENT PLAYER LOTS: Notice generateAuctionLots() NO LONGER touches state.myAuctionListings!
+function generateAuctionLots() {
+  auctionLots = [];
+  const countries = ['RU', 'BY', 'KZ'];
+  for (let i = 0; i < 6; i++) {
+    const c = countries[i % 3];
+    const rar = [1, 2, 2, 3, 4, 5][i];
+    const plate = generatePlateData(c, 'case', rar);
+    const askPrice = Math.round(plate.price * (0.72 + Math.random() * 0.25));
+    const minBid = Math.round(askPrice * 0.60);
+    auctionLots.push({
+      plate,
+      askPrice,
+      minBid,
+      selectedBid: Math.round(askPrice * 0.75),
+      seller: ['Конфискат_МСК', 'Перекуп_Минск', 'Астана_Спец', 'Гараж_95', 'Таможня_СНГ', 'VIP_Брокер'][i]
+    });
+  }
+  state.auctionEndTime = Date.now() + 300000;
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+function forceRefreshAuction() {
+  if (state.gems < 15) { showToast('Недостаточно 💎 Кристаллов!'); return; }
+  state.gems -= 15;
+  generateAuctionLots();
+  playTone(260, 'sine', 0.2, 0.3);
+  showToast('💎 Витрина аукциона обновлена! Ваши активные лоты продолжают продаваться.');
+}
+
+function calcBidWinChance(lot, bidVal) {
+  const skill = state.skills.haggle_master || 0;
+  const ratio = Math.max(0, Math.min(1, (bidVal - lot.minBid) / Math.max(1, lot.askPrice - lot.minBid)));
+  const chance = 22.0 + ratio * 73.0 + skill * 0.8;
+  return +Math.min(98.5, chance).toFixed(1);
+}
+
+function onLotBidSliderChange(idx, val) {
+  const lot = auctionLots[idx];
+  if (!lot) return;
+  lot.selectedBid = parseInt(val, 10);
+  const lbl = document.getElementById(`lot-bid-val-${idx}`);
+  const chLbl = document.getElementById(`lot-bid-ch-${idx}`);
+  if (lbl) lbl.textContent = fmt(lot.selectedBid);
+  if (chLbl) chLbl.textContent = fmtPct(calcBidWinChance(lot, lot.selectedBid));
+}
+
+function renderAuction() {
+  const mySec = document.getElementById('my-auction-section');
+  const myGrid = document.getElementById('my-auction-grid');
+  if (state.myAuctionListings.length > 0) {
+    mySec.style.display = 'block';
+    myGrid.innerHTML = '';
+    state.myAuctionListings.forEach(item => {
+      const p = item.plate;
+      const r = RARITIES[p.rarity];
+      const remSec = Math.max(1, Math.ceil((item.sellAt - Date.now()) / 1000));
+      const boostRub = Math.max(300, Math.round(item.askPrice * 0.04));
+      const div = document.createElement('div');
+      div.className = 'box-card';
+      div.style.borderColor = 'var(--gold)';
+      div.innerHTML = `
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="badge" style="color:${r.color}">• ${r.name}</span>
+            <span class="badge" style="color:var(--gold)">Наценка +${fmtPct(item.markupPct)} (Шанс ${fmtPct(item.succProb)})</span>
+          </div>
+          <div class="mini-plate ${p.isCrashed ? 'crashed' : ''}">${formatPlateString(p)}</div>
+          <p style="font-size:12.5px; margin-top:8px;">
+            Цена выкупа: <b style="color:var(--green)">${fmt(item.askPrice)}</b><br>
+            Осталось времени: <b style="color:var(--gold)" class="my-lot-timer" data-uid="${item.uid}">${remSec} сек</b>
+          </p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; gap:6px;">
+            <button class="btn-sec auc" style="flex:1" onclick="boostMyAuctionLotSpeed('${item.uid}', false)">⚡ -60 сек (${fmt(boostRub)})</button>
+            <button class="btn-sec gem" style="flex:1" onclick="boostMyAuctionLotSpeed('${item.uid}', true)">⚡ Мгновенно (3 💎)</button>
+          </div>
+          <button class="btn-sec" onclick="cancelMyAuctionListing('${item.uid}')">Снять с торгов</button>
+        </div>
+      `;
+      myGrid.appendChild(div);
+    });
+  } else {
+    mySec.style.display = 'none';
+  }
+
+  const grid = document.getElementById('auction-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  auctionLots.forEach((lot, idx) => {
+    const p = lot.plate;
+    const r = RARITIES[p.rarity];
+    const winCh = calcBidWinChance(lot, lot.selectedBid);
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span class="badge" style="color:${r.color}">• ${r.name}</span>
+          <span style="font-size:11px; color:var(--muted)">${lot.seller}</span>
+        </div>
+        <div class="mini-plate ${p.isCrashed ? 'crashed' : ''}">${formatPlateString(p)}</div>
+        <p style="font-size:12px; color:var(--muted); margin-top:6px;">
+          Рыночная оценка: <b style="color:#fff">${fmt(p.price)}</b> · Блиц: <b style="color:var(--gold)">${fmt(lot.askPrice)}</b>
+        </p>
+
+        <!-- BIDDING SLIDER -->
+        <div style="background:var(--panel-2); padding:10px; border-radius:10px; border:1px solid var(--border); margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+            <span>Ваша ставка: <b id="lot-bid-val-${idx}" style="color:#60a5fa">${fmt(lot.selectedBid)}</b></span>
+            <span>Шанс: <b id="lot-bid-ch-${idx}" style="color:var(--green)">${fmtPct(winCh)}</b></span>
+          </div>
+          <input type="range" min="${lot.minBid}" max="${lot.askPrice}" step="100" value="${lot.selectedBid}" style="width:100%;" oninput="onLotBidSliderChange(${idx}, this.value)">
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-sec auc" style="flex:1" onclick="bidOnAuctionLot(${idx})">🙋 Сделать ставку</button>
+        <button class="btn-sec sell" style="flex:1" onclick="buyAuctionLot(${idx})">🔨 Блиц (${fmt(lot.askPrice)})</button>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function buyAuctionLot(idx) {
+  const lot = auctionLots[idx];
+  if (!lot) return;
+  if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+  if (state.money < lot.askPrice) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= lot.askPrice;
+  state.inventory.unshift(lot.plate);
+  auctionLots.splice(idx, 1);
+  addXp(25);
+  showToast(`Лот ${formatPlateString(lot.plate)} выкуплен по блиц-цене!`);
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+function bidOnAuctionLot(idx) {
+  const lot = auctionLots[idx];
+  if (!lot) return;
+  if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+  if (state.money < lot.selectedBid) { showToast('Недостаточно чистых денег для выбранной ставки!'); return; }
+
+  const winChance = calcBidWinChance(lot, lot.selectedBid);
+  if (Math.random() * 100 < winChance) {
+    state.money -= lot.selectedBid;
+    state.inventory.unshift(lot.plate);
+    auctionLots.splice(idx, 1);
+    addXp(30);
+    showToast(`🎉 Ваша ставка ${fmt(lot.selectedBid)} (${fmtPct(winChance)}) победила! Номер на складе.`);
+  } else {
+    lot.minBid = Math.min(lot.askPrice, Math.round(lot.selectedBid * 1.08));
+    lot.selectedBid = lot.minBid;
+    showToast(`🔨 Конкурент перебил вашу ставку! Минимальная ставка выросла до ${fmt(lot.minBid)}.`);
+  }
+  renderAuction();
+  updateUI();
+  saveGame();
+}
+
+/* ======================= DONATE SHOP ======================= */
+let selectedDonatePack = null;
+
+function renderDonateShop() {
+  document.getElementById('donate-gem-bal').textContent = state.gems;
+
+  const pGrid = document.getElementById('donate-packs-grid');
+  pGrid.innerHTML = '';
+  DONATE_PACKS.forEach(pk => {
+    const totalGems = pk.gems + pk.bonus;
+    const div = document.createElement('div');
+    div.className = 'donate-card';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span class="badge" style="color:#22d3ee; border-color:#06b6d4;">${pk.tag}</span>
+          <span style="font-size:12px; color:var(--muted)">Магазин</span>
+        </div>
+        <h3 style="font-size:16px;">${pk.name}</h3>
+        <div style="font-size:26px; font-weight:900; color:#22d3ee; margin:10px 0 4px;">
+          ${totalGems.toLocaleString('ru-RU')} 💎
+        </div>
+        <p style="font-size:12px; color:var(--muted);">
+          Базово: ${pk.gems} 💎 ${pk.bonus > 0 ? `+ <b style="color:var(--green)">${pk.bonus} 💎 БОНУС</b>` : ''}
+        </p>
+      </div>
+      <button class="btn-main" style="background:linear-gradient(135deg,#0891b2,#2563eb);" onclick="openPaymentModal('${pk.id}')">
+        💳 Купить за ${pk.rub} ₽
+      </button>
+    `;
+    pGrid.appendChild(div);
+  });
+
+  const exGrid = document.getElementById('donate-exchange-grid');
+  exGrid.innerHTML = '';
+  DONATE_EXCHANGE.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <span class="badge" style="color:var(--gold)">${ex.bonusText}</span>
+        <h3 style="margin-top:8px;">${ex.title}</h3>
+        <div style="font-size:22px; font-weight:900; color:var(--green); margin:8px 0;">
+          +${fmt(ex.cleanRub)}
+        </div>
+        <p style="font-size:12px; color:var(--muted);">Мгновенное зачисление чистых легальных рублей</p>
+      </div>
+      <button class="btn-sec gem" onclick="exchangeGemsForClean(${idx})">
+        💱 Обменять за ${ex.gems} 💎
+      </button>
+    `;
+    exGrid.appendChild(div);
+  });
+}
+
+function openPaymentModal(packId) {
+  const pk = DONATE_PACKS.find(x => x.id === packId);
+  if (!pk) return;
+  selectedDonatePack = pk;
+  document.getElementById('pay-pack-title').textContent = `${pk.name} (${pk.gems + pk.bonus} 💎)`;
+  document.getElementById('pay-pack-rub').textContent = `К оплате: ${pk.rub} ₽`;
+  document.getElementById('payment-modal').classList.add('show');
+}
+
+function closePaymentModal() {
+  document.getElementById('payment-modal').classList.remove('show');
+  selectedDonatePack = null;
+}
+
+function confirmRealPayment() {
+  if (!selectedDonatePack) return;
+  const totalGems = selectedDonatePack.gems + selectedDonatePack.bonus;
+  state.gems += totalGems;
+  playTone(280, 'sine', 0.3, 0.35);
+  showToast(`✅ Оплата прошла успешно! Зачислено +${totalGems} 💎 Кристаллов!`);
+  closePaymentModal();
+  renderDonateShop();
+  updateUI();
+  saveGame();
+}
+
+function exchangeGemsForClean(idx) {
+  const ex = DONATE_EXCHANGE[idx];
+  if (!ex) return;
+  if (state.gems < ex.gems) { showToast(`Недостаточно 💎 Кристаллов!`); return; }
+  state.gems -= ex.gems;
+  state.money += ex.cleanRub;
+  playTone(230, 'sine', 0.25, 0.3);
+  showToast(`💱 Обмен выполнен! Вы получили +${fmt(ex.cleanRub)} чистых рублей!`);
+  renderDonateShop();
+  updateUI();
+  saveGame();
+}
+
+/* ======================= SKILLS ======================= */
+function renderSkills() {
+  document.getElementById('ui-sp-count').textContent = state.skillPoints;
+  const grid = document.getElementById('skills-grid');
+  grid.innerHTML = '';
+  SKILLS_CONFIG.forEach(s => {
+    const lvl = state.skills[s.id] || 0;
+    const isMax = lvl >= s.max;
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>${s.name}</h3>
+          <span class="badge" style="color:var(--gold)">Ур. ${lvl} / ${s.max}</span>
+        </div>
+        <p style="font-size:12.5px; color:var(--muted); margin-top:8px;">${s.desc}</p>
+        <div class="prog-wrap" style="margin-top:10px;"><div class="prog-fill" style="width:${(lvl/s.max)*100}%"></div></div>
+      </div>
+      <button class="btn-sec" ${isMax || state.skillPoints <= 0 ? 'disabled' : ''} onclick="upgradeSkill('${s.id}')">
+        ${isMax ? '✔ Максимальный уровень' : '⬆️ Изучить уровень (1 Очко навыка)'}
+      </button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function upgradeSkill(id) {
+  const cfg = SKILLS_CONFIG.find(x => x.id === id);
+  if (!cfg || state.skillPoints <= 0 || state.skills[id] >= cfg.max) return;
+  state.skillPoints--;
+  state.skills[id]++;
+  playTone(220, 'sine', 0.2, 0.3);
+  showToast(`🧠 Навык «${cfg.name}» повышен до уровня ${state.skills[id]}/${cfg.max}!`);
+  renderSkills();
+  updateUI();
+  saveGame();
+}
+
+/* ======================= EMPIRE (NON-STACKING CAR SLOTS & TAXED BIZ) ======================= */
+function renderEmpire() {
+  const maxCars = getMaxCarSlots();
+  const curCars = Object.keys(state.carsOwned).length;
+  const taxPct = fmtPct(getTaxRate() * 100);
+  document.getElementById('empire-car-cap-info').textContent = `Машин в гараже: ${curCars} из ${maxCars} (Не суммируется)`;
+  document.getElementById('biz-tax-header').textContent = taxPct;
+
+  // 1. Homes
+  const hGrid = document.getElementById('homes-grid');
+  hGrid.innerHTML = '';
+  HOMES_CATALOG.forEach(h => {
+    const owned = state.homesOwned.includes(h.id);
+    const isActiveCap = maxCars === h.carSlots && owned;
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    if (isActiveCap) div.style.borderColor = 'var(--gold)';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>🏡 ${h.name}</h3>
+          <span class="badge" style="color:var(--gold)">🚗 ${h.carSlots} авто-мест</span>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin:6px 0;">
+          Статус: <b>${h.prestige}</b><br>
+          Склад номеров: <b style="color:var(--green)">+${h.slots} мест</b><br>
+          Вместимость гаража (не суммируется): <b style="color:#60a5fa">${h.carSlots} авто</b>
+        </p>
+      </div>
+      ${owned ? `<button class="btn-sec" disabled>✔ В собственности ${isActiveCap?'(Активный гараж)':''}</button>` : `<button class="btn-sec" onclick="buyHome('${h.id}')">Купить (${fmt(h.cost)})</button>`}
+    `;
+    hGrid.appendChild(div);
+  });
+
+  // 2. Cars
+  const cGrid = document.getElementById('cars-grid');
+  cGrid.innerHTML = '';
+  CARS_CATALOG.forEach(c => {
+    const owned = state.carsOwned[c.id];
+    const eqPlate = owned && owned.plateUid ? state.inventory.find(p => p.uid === owned.plateUid) : null;
+    const bonusInc = eqPlate ? Math.floor(eqPlate.price * 0.0015) : 0;
+
+    let opts = `<option value="">-- Без номера --</option>`;
+    state.inventory.forEach(p => {
+      const sel = eqPlate && eqPlate.uid === p.uid ? 'selected' : '';
+      opts += `<option value="${p.uid}" ${sel}>${formatPlateString(p)} (+${fmt(Math.floor(p.price*0.0015))}/с)</option>`;
+    });
+
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <div class="car-photo-stage">
+          <img src="${c.img}" alt="${c.name}" loading="lazy">
+          <div class="car-plate-badge">${eqPlate ? formatPlateString(eqPlate) : 'БЕЗ НОМЕРА'}</div>
+        </div>
+        <h3 style="margin-top:10px;">${c.name}</h3>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">
+          Доход престижа: <b style="color:var(--gold)">+${fmt(c.income)}/сек</b>
+          ${owned ? `<br>Бонус от госномера: <b style="color:var(--green)">+${fmt(bonusInc)}/сек</b>` : ''}
+        </p>
+      </div>
+      ${owned ? `<select style="width:100%;" onchange="equipPlateOnCar('${c.id}', this.value)">${opts}</select>` : `<button class="btn-sec" onclick="buyCar('${c.id}')">Купить авто (${fmt(c.cost)})</button>`}
+    `;
+    cGrid.appendChild(div);
+  });
+
+  // 3. Businesses (Taxed by State Tax!)
+  const bGrid = document.getElementById('biz-grid');
+  bGrid.innerHTML = '';
+  const tax = getTaxRate();
+  BIZ_CATALOG.forEach(b => {
+    const cnt = state.bizOwned[b.id] || 0;
+    const cost = Math.round(b.cost * Math.pow(1.4, cnt));
+    const netInc = Math.round(b.income * (1 - tax));
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <h3>🏭 ${b.name} <span class="badge">Ур. ${cnt}</span></h3>
+        <p style="font-size:12px; color:#c084fc; margin:6px 0;">🧼 ${b.desc}</p>
+        <p style="font-size:12px; color:var(--muted);">
+          Грязная выручка: ${fmt(b.income)}/сек<br>
+          Чистыми после госналога (-${fmtPct(tax*100)}): <b style="color:var(--green)">+${fmt(netInc)}/сек</b>
+        </p>
+      </div>
+      <button class="btn-sec" onclick="buyBiz('${b.id}')">Открыть / Улучшить (${fmt(cost)})</button>
+    `;
+    bGrid.appendChild(div);
+  });
+}
+
+function buyCar(id) {
+  const c = CARS_CATALOG.find(x => x.id === id);
+  if (!c || state.carsOwned[id]) return;
+  const maxCars = getMaxCarSlots();
+  const curCars = Object.keys(state.carsOwned).length;
+  if (curCars >= maxCars) {
+    showToast(`🏠 Нет мест в гараже (${curCars}/${maxCars})! Купите более просторную Недвижимость (слоты не суммируются).`);
+    return;
+  }
+  if (state.money < c.cost) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= c.cost;
+  state.carsOwned[id] = { plateUid: null };
+  addXp(45);
+  showToast(`🚗 Вы приобрели ${c.name}! Мест занято: ${curCars + 1}/${maxCars}.`);
+  renderEmpire(); updateUI(); saveGame();
+}
+
+function equipPlateOnCar(carId, plateUid) {
+  for (let k in state.carsOwned) {
+    if (state.carsOwned[k].plateUid === plateUid) state.carsOwned[k].plateUid = null;
+  }
+  state.carsOwned[carId].plateUid = plateUid || null;
+  renderEmpire(); updateUI(); saveGame();
+}
+
+function buyBiz(id) {
+  const b = BIZ_CATALOG.find(x => x.id === id);
+  const cnt = state.bizOwned[id] || 0;
+  const cost = Math.round(b.cost * Math.pow(1.4, cnt));
+  if (state.money < cost) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= cost;
+  state.bizOwned[id] = cnt + 1;
+  addXp(30);
+  if (cnt === 0) showToast(`🏭 Предприятие «${b.name}» открыто! Разблокирована новая схема Отмыва кэша!`);
+  renderEmpire(); updateUI(); saveGame();
+}
+
+function buyHome(id) {
+  const h = HOMES_CATALOG.find(x => x.id === id);
+  if (!h || state.homesOwned.includes(id)) return;
+  if (state.money < h.cost) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= h.cost;
+  state.homesOwned.push(id);
+  addXp(40);
+  showToast(`🏡 Куплено: ${h.name}! Гараж вмещает до ${getMaxCarSlots()} авто.`);
+  renderEmpire(); updateUI(); saveGame();
+}
+
+/* ======================= CASES, STEAL, LAUNDER (UNLOCKED BY BIZ) ======================= */
+let caseSpinning = false;
+function renderCases() {
+  const grid = document.getElementById('cases-grid');
+  grid.innerHTML = '';
+  CASES_CONFIG.forEach(c => {
+    const chanceBadges = c.chances.map((ch, idx) => ch <= 0 ? '' : `<span class="badge" style="color:${RARITIES[idx].color};">${RARITIES[idx].name}: ${fmtPct(ch)}</span>`).join(' ');
+    const priceLabel = c.currency === 'gem' ? `💎 ${c.cost} Кристаллов` : fmt(c.cost);
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>${c.name}</h3>
+          <span class="badge" style="color:var(--gold)">${priceLabel}</span>
+        </div>
+        <p style="font-size:12.5px; color:var(--muted); margin:8px 0;">${c.desc}</p>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;">${chanceBadges}</div>
+      </div>
+      <button class="btn-main" onclick="spinCaseRoulette('${c.id}')">🎰 Открыть кейс</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function pickRarityByWeights(weights) {
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < weights.length; i++) {
+    if (r < weights[i]) return i;
+    r -= weights[i];
+  }
+  return 0;
+}
+
+function spinCaseRoulette(caseId) {
+  if (caseSpinning) return;
+  if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+  const cfg = CASES_CONFIG.find(x => x.id === caseId);
+  if (!cfg) return;
+  if (cfg.currency === 'gem') {
+    if (state.gems < cfg.cost) { showToast('Недостаточно 💎 Кристаллов!'); return; }
+    state.gems -= cfg.cost;
+  } else {
+    if (state.money < cfg.cost) { showToast('Недостаточно чистых денег!'); return; }
+    state.money -= cfg.cost;
+  }
+  updateUI();
+
+  caseSpinning = true;
+  const modal = document.getElementById('case-roller-modal');
+  const track = document.getElementById('roulette-track');
+  const statusEl = document.getElementById('case-opening-status');
+  document.getElementById('case-opening-title').textContent = `🎰 Открываем: ${cfg.name}`;
+  modal.classList.add('active');
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0px)';
+  track.innerHTML = '';
+
+  const WIN_INDEX = 28;
+  const items = [];
+  for (let i = 0; i < 36; i++) {
+    const rar = pickRarityByWeights(cfg.chances);
+    const p = generatePlateData(state.selectedCountry, 'case', rar);
+    items.push(p);
+    const el = document.createElement('div');
+    el.className = 'roulette-item';
+    el.style.borderBottomColor = RARITIES[p.rarity].color;
+    el.innerHTML = `
+      <div style="font-size:10px; font-weight:900; color:${RARITIES[p.rarity].color}; margin-bottom:4px;">${RARITIES[p.rarity].name}</div>
+      <div class="mini-plate ${p.isCrashed ? 'crashed' : ''}" style="font-size:13px; padding:3px 8px;">${formatPlateString(p)}</div>
+      <div style="font-size:12px; font-weight:800; margin-top:5px;">${fmt(p.price)}</div>
+    `;
+    track.appendChild(el);
+  }
+
+  const winningPlate = items[WIN_INDEX];
+  statusEl.textContent = 'Крутим ленту...';
+
+  requestAnimationFrame(() => {
+    const viewportW = modal.querySelector('.roulette-viewport').clientWidth;
+    const targetOffset = (WIN_INDEX * 185) - (viewportW / 2) + (175 / 2) + ((Math.random() - 0.5) * 60);
+    track.style.transition = 'transform 4.0s cubic-bezier(0.12, 0.85, 0.22, 1)';
+    track.style.transform = `translateX(-${targetOffset}px)`;
+  });
+
+  setTimeout(() => {
+    playTone(90, 'sawtooth', 0.35, 0.35);
+    state.inventory.unshift(winningPlate);
+    addXp(30 + winningPlate.rarity * 20);
+    statusEl.innerHTML = `🎉 Выпал номер <b style="color:${RARITIES[winningPlate.rarity].color}">${formatPlateString(winningPlate)}</b> (${fmt(winningPlate.price)})!`;
+    caseSpinning = false;
+    updateUI();
+    saveGame();
+  }, 4150);
+}
+
+// 4-Bolt Steal & Scrapyard
+let stealState = { boltIndex: 0, cursorPos: 0, cursorDir: 1, timeLeft: 12.0, active: true };
+
+function getStealZoneBounds() {
+  const skill = state.skills.nimble_hands || 0;
+  const width = 14 + skill * 1.1;
+  return { left: 50 - width / 2, width };
+}
+
+function resetStealGame() {
+  stealState = { boltIndex: 0, cursorPos: 0, cursorDir: 1, timeLeft: 12.0, active: true };
+  document.getElementById('steal-mystery-text').textContent = '? ??? ??';
+  document.getElementById('steal-bolt-num').textContent = '1 из 4';
+  for (let i = 0; i < 4; i++) {
+    const b = document.getElementById('bolt-' + i);
+    if (b) b.className = `screw-node screw-${['tl','tr','bl','br'][i]} ${i===0?'active':''}`;
+  }
+  const z = getStealZoneBounds();
+  const zEl = document.getElementById('steal-zone');
+  if (zEl) { zEl.style.left = z.left + '%'; zEl.style.width = z.width + '%'; }
+}
+
+setInterval(() => {
+  const tabActive = document.getElementById('tab-steal').classList.contains('active');
+  if (!tabActive || !stealState.active) return;
+
+  const skill = state.skills.nimble_hands || 0;
+  const speed = Math.max(1.1, 2.5 - skill * 0.07);
+  stealState.cursorPos += stealState.cursorDir * speed;
+  if (stealState.cursorPos >= 96) { stealState.cursorPos = 96; stealState.cursorDir = -1; }
+  if (stealState.cursorPos <= 0) { stealState.cursorPos = 0; stealState.cursorDir = 1; }
+
+  const cur = document.getElementById('steal-cursor');
+  if (cur) cur.style.left = stealState.cursorPos + '%';
+
+  stealState.timeLeft = Math.max(0, stealState.timeLeft - 0.02);
+  const tEl = document.getElementById('steal-timer-txt');
+  if (tEl) tEl.textContent = stealState.timeLeft.toFixed(1) + ' сек';
+
+  if (stealState.timeLeft <= 0) failSteal('🚨 Время вышло! Завыла сирена!');
+}, 20);
+
+function hitBolt() {
+  if (!stealState.active) { resetStealGame(); return; }
+  if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+  const z = getStealZoneBounds();
+  if (stealState.cursorPos >= z.left - 2 && stealState.cursorPos <= z.left + z.width + 2) {
+    playTone(180 + stealState.boltIndex * 40, 'sine', 0.12, 0.25);
+    const curBolt = document.getElementById('bolt-' + stealState.boltIndex);
+    if (curBolt) curBolt.className = `screw-node screw-${['tl','tr','bl','br'][stealState.boltIndex]} done`;
+    stealState.boltIndex++;
+    if (stealState.boltIndex >= 4) {
+      stealState.active = false;
+      const plate = generatePlateData(state.selectedCountry, 'steal');
+      state.inventory.unshift(plate);
+      document.getElementById('steal-mystery-text').textContent = formatPlateString(plate);
+      addXp(22);
+      showToast(`🥷 Номер ${formatPlateString(plate)} скручен! Оценка: ${fmt(plate.price)}.`);
+      updateUI();
+      saveGame();
+      setTimeout(resetStealGame, 1500);
+    } else {
+      const nextBolt = document.getElementById('bolt-' + stealState.boltIndex);
+      if (nextBolt) nextBolt.classList.add('active');
+      document.getElementById('steal-bolt-num').textContent = `${stealState.boltIndex + 1} из 4`;
+    }
+  } else {
+    failSteal('🚨 Сорвалась отвёртка! Сработала сигнализация!');
+  }
+}
+
+function failSteal(reason) {
+  stealState.active = false;
+  playTone(60, 'sawtooth', 0.4, 0.35);
+  const fine = Math.min(state.money, 450);
+  state.money -= fine;
+  showToast(`${reason} Штраф патрулю: -${fmt(fine)}`);
+  updateUI();
+  setTimeout(resetStealGame, 1200);
+}
+
+function initScrapyard() {
+  const grid = document.getElementById('scrap-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'scrap-cell';
+    cell.innerHTML = '🚙<span style="font-size:10px; color:var(--muted); margin-top:4px;">Искать (350 ₽)</span>';
+    cell.onclick = () => {
+      if (cell.dataset.dug) return;
+      if (state.money < 350) { showToast('Нужно 350 ₽!'); return; }
+      if (state.inventory.length >= getMaxInventory()) { showToast('Склад полон!'); return; }
+      state.money -= 350;
+      cell.dataset.dug = '1';
+      if (Math.random() < 0.35) {
+        cell.innerHTML = '🔩<span style="font-size:10px; color:var(--red)">Пустой бампер</span>';
+      } else {
+        const p = generatePlateData(state.selectedCountry, 'scrap');
+        state.inventory.unshift(p);
+        addXp(10);
+        cell.innerHTML = `<b style="font-size:11px; color:${RARITIES[p.rarity].color}">${formatPlateString(p)}</b><span style="font-size:10px; color:var(--green)">${fmt(p.price)}</span>`;
+      }
+      updateUI();
+      saveGame();
+    };
+    grid.appendChild(cell);
+  }
+}
+
+// Money Laundering (Unlocked by Businesses)
+function renderLaunder() {
+  const fee = getLaunderFee();
+  document.getElementById('launder-fee-txt').textContent = fmtPct(fee * 100);
+  const riskEl = document.getElementById('obep-risk-txt');
+  riskEl.textContent = state.dirtyMoney > 50000 ? 'ВЫСОКИЙ (3.0% / сек риск конфискации!)' : 'Низкий (0.0%)';
+  riskEl.style.color = state.dirtyMoney > 50000 ? 'var(--red)' : 'var(--green)';
+
+  const grid = document.getElementById('launder-schemes');
+  grid.innerHTML = '';
+  LAUNDER_SCHEMES.forEach(sc => {
+    const unlocked = !sc.reqBiz || (state.bizOwned[sc.reqBiz] && state.bizOwned[sc.reqBiz] > 0);
+    const amt = Math.min(state.dirtyMoney, sc.maxAmt);
+    const cleanOut = Math.round(amt * (1 - fee));
+    const div = document.createElement('div');
+    div.className = 'box-card';
+    if (!unlocked) div.style.opacity = '0.6';
+    div.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>🧼 ${sc.name}</h3>
+          <span class="badge" style="color:${unlocked?'var(--green)':'var(--red)'}">${unlocked?'Открыто':'Заблокировано'}</span>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin:6px 0;">${sc.desc}<br>Лимит: <b>до ${fmt(sc.maxAmt)}</b> · Время: <b>${sc.durationSec} сек</b></p>
+        <p style="font-size:12.5px;">К получению чистыми: <b style="color:var(--green)">${fmt(cleanOut)}</b></p>
+      </div>
+      ${unlocked
+        ? `<button class="btn-sec dirty" ${state.launderJob || amt <= 0 ? 'disabled' : ''} onclick="startLaunder('${sc.id}')">Отмыть (${fmt(amt)})</button>`
+        : `<button class="btn-sec" onclick="switchTab('empire')">🏭 Купить бизнес для открытия</button>`}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function startLaunder(schemeId) {
+  if (state.launderJob || state.dirtyMoney <= 0) return;
+  const sc = LAUNDER_SCHEMES.find(x => x.id === schemeId);
+  if (!sc) return;
+  if (sc.reqBiz && (!state.bizOwned[sc.reqBiz] || state.bizOwned[sc.reqBiz] <= 0)) {
+    showToast('Сначала купите соответствующее предприятие!');
+    return;
+  }
+  const amt = Math.min(state.dirtyMoney, sc.maxAmt);
+  if (amt <= 0) return;
+  const fee = getLaunderFee();
+  const cleanOut = Math.round(amt * (1 - fee));
+  const totalMs = Math.round(sc.durationSec * 1000 * (1 - (state.skills.launder_pro || 0) * 0.03));
+  state.dirtyMoney -= amt;
+  state.launderJob = { amount: amt, cleanOut, startTime: Date.now(), endTime: Date.now() + totalMs, totalMs };
+  renderLaunder();
+  updateUI();
+}
+
+/* ======================= CLAN MANAGEMENT (INVITE PLAYERS BY ID) & FORBES ======================= */
+const RIVAL_BOTS = [
+  { name: 'Шейх_Астана', id: '000001', lvl: 42, nw: 240000000 },
+  { name: 'Генерал_АМР97', id: '000097', lvl: 35, nw: 85000000 },
+  { name: 'Король_Рублёвки', id: '000777', lvl: 28, nw: 19500000 },
+  { name: 'Минский_Барон', id: '000007', lvl: 19, nw: 3200000 },
+  { name: 'Саня_Перекуп', id: '409112', lvl: 7, nw: 85000 }
+];
+
+function renderClanAndForbes() {
+  const cBox = document.getElementById('clan-box');
+  if (!state.clan) {
+    cBox.innerHTML = `
+      <div class="box-card">
+        <h3>🛡️ Создать Клан</h3>
+        <p style="font-size:12.5px; color:var(--muted);">Клан повышает шанс на редкие серии, увеличивает доход и позволяет приглашать игроков по их ID.</p>
+        <input id="c-tag" placeholder="Тег (напр. АМР)" maxlength="4">
+        <input id="c-name" placeholder="Название клана" maxlength="20">
+        <button class="btn-main" onclick="createClan()">Основать клан (30 000 ₽)</button>
+      </div>
+    `;
+  } else {
+    const cost = state.clan.level * 90000;
+    const members = state.clan.members || [];
+    const membersHtml = members.map((m, idx) => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--panel-2); border-radius:8px; font-size:12px;">
+        <span>👤 <b>${m.name}</b> <span class="badge">ID: ${m.id}</span></span>
+        <span style="color:var(--gold)">${m.role} ${idx > 0 ? `<button class="btn-sec" style="padding:2px 6px; margin-left:6px;" onclick="kickClanMember(${idx})">✕</button>` : ''}</span>
+      </div>
+    `).join('');
+
+    cBox.innerHTML = `
+      <div class="box-card">
+        <div>
+          <h3>🛡️ Клан [${state.clan.tag}] ${state.clan.name} <span class="badge">Ур. ${state.clan.level}</span></h3>
+          <p style="font-size:12.5px; color:var(--muted); margin-top:4px;">
+            Бонус удачи: <b style="color:#60a5fa">+${fmtPct(state.clan.level*8 + members.length*2)}</b> ·
+            Бонус дохода: <b style="color:var(--green)">+${fmtPct(state.clan.level*5 + members.length*2)}</b>
+          </p>
+        </div>
+
+        <div style="border-top:1px solid var(--border); padding-top:10px;">
+          <label style="font-size:12px; color:var(--muted);">➕ Пригласить / Добавить игрока в клан по уникальному ID:</label>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <input id="clan-invite-id-inp" placeholder="ID игрока (напр. 777001)" style="flex:1;">
+            <button class="btn-sec sell" onclick="invitePlayerToClanById()">Пригласить</button>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+          <div style="font-size:12px; font-weight:800; color:var(--muted);">Состав клана (${members.length}/10):</div>
+          ${membersHtml}
+        </div>
+
+        <button class="btn-main" onclick="upgradeClan()">⬆️ Прокачать уровень клана (${fmt(cost)})</button>
+      </div>
+    `;
+  }
+
+  const nw = getNetWorth();
+  const rows = [...RIVAL_BOTS, { name: state.nickname, id: state.playerId, lvl: state.level, nw, isMe: true }].sort((a,b) => b.nw - a.nw);
+  const tbody = document.querySelector('#leaderboard-table tbody');
+  tbody.innerHTML = '';
+  rows.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    if (r.isMe) tr.className = 'me';
+    tr.innerHTML = `<td>#${idx+1}</td><td>${r.name} ${r.isMe?'👈':''}</td><td><span class="badge">${r.id}</span></td><td>Ур. ${r.lvl}</td><td style="color:var(--green); font-weight:800;">${fmt(r.nw)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function createClan() {
+  if (state.money < 30000) { showToast('Нужно 30 000 ₽ чистых денег!'); return; }
+  state.money -= 30000;
+  state.clan = {
+    tag: (document.getElementById('c-tag').value || 'VIP').toUpperCase(),
+    name: document.getElementById('c-name').value || 'Синдикат ГОСТ',
+    level: 1,
+    members: [{ id: state.playerId, name: state.nickname, role: 'Лидер' }]
+  };
+  renderClanAndForbes(); updateUI(); saveGame();
+}
+
+function invitePlayerToClanById() {
+  if (!state.clan) return;
+  const idVal = document.getElementById('clan-invite-id-inp').value.trim();
+  if (!idVal || idVal.length < 4) { showToast('Введите корректный ID игрока!'); return; }
+  state.clan.members = state.clan.members || [];
+  if (state.clan.members.length >= 10) { showToast('В клане максимум 10 участников!'); return; }
+  if (state.clan.members.some(m => m.id === idVal)) { showToast('Этот игрок уже состоит в вашем клане!'); return; }
+
+  const knownFriend = state.friends.find(f => f.id === idVal);
+  const memberName = knownFriend ? knownFriend.name : `Участник_${idVal}`;
+  state.clan.members.push({ id: idVal, name: memberName, role: 'Боец клана' });
+  document.getElementById('clan-invite-id-inp').value = '';
+  showToast(`🛡️ Игрок ${memberName} (ID: ${idVal}) принят в клан!`);
+  renderClanAndForbes();
+  updateUI();
+  saveGame();
+}
+
+function kickClanMember(idx) {
+  if (!state.clan || idx <= 0) return;
+  state.clan.members.splice(idx, 1);
+  renderClanAndForbes();
+  updateUI();
+  saveGame();
+}
+
+function upgradeClan() {
+  const cost = state.clan.level * 90000;
+  if (state.money < cost) { showToast('Недостаточно чистых денег!'); return; }
+  state.money -= cost; state.clan.level++;
+  renderClanAndForbes(); updateUI(); saveGame();
+}
+
+/* ======================= PROFILE & CRYSTAL ACHIEVEMENTS ======================= */
+const AVATARS = ['😎','🤠','🕵️‍♂️','👑','🥷','🦈','🦁','🚔'];
+const ONLINE_PLAYERS = [
+  { id: '551902', name: 'Артур_777', lvl: 14, status: 'Ищет серию АМР' },
+  { id: '339104', name: 'Макс_Минск', lvl: 11, status: 'Крутит номера РБ' },
+  { id: '664811', name: 'Тимур_Казахстан', lvl: 19, status: 'Скупает зеркалки' }
+];
+
+function switchProfileSub(sub) {
+  ['info','friends','settings'].forEach(k => {
+    document.getElementById('prof-sub-' + k).style.display = (k === sub) ? 'block' : 'none';
+    document.getElementById('prof-btn-' + k).classList.toggle('active', k === sub);
+  });
+  renderProfileTab();
+}
+
+function claimAchievementReward(achId) {
+  const cfg = ACHIEVEMENTS_CONFIG.find(x => x.id === achId);
+  if (!cfg || state.claimedAchievements.includes(achId) || !cfg.check(state)) return;
+  state.claimedAchievements.push(achId);
+  state.gems += cfg.rewardGems;
+  playTone(260, 'sine', 0.25, 0.3);
+  showToast(`🎖️ Достижение «${cfg.title}» выполнено! Награда: +${cfg.rewardGems} 💎 Кристаллов!`);
+  renderProfileTab();
+  updateUI();
+  saveGame();
+}
+
+function renderProfileTab() {
+  document.getElementById('profile-avatar-box').textContent = state.avatar || '😎';
+  document.getElementById('prof-nick-display').textContent = state.nickname;
+  document.getElementById('prof-id-display').textContent = `ID: ${state.playerId}`;
+  document.getElementById('friends-count-lbl').textContent = state.friends.length;
+
+  document.getElementById('prof-detailed-stats').innerHTML = `
+    <div>💰 Капитал (Net Worth): <b style="color:var(--green)">${fmt(getNetWorth())}</b></div>
+    <div>📈 Чистый пассивный доход: <b style="color:var(--gold)">+${fmt(getPassiveIncome())}/сек</b></div>
+    <div>🚗 Вместимость гаража (не суммируется): <b>${Object.keys(state.carsOwned).length} / ${getMaxCarSlots()} авто</b></div>
+    <div>🎰 Всего прокруток: <b>${state.totalRolls}</b></div>
+    <div>🏆 Рекордный номер: <b style="color:var(--gold)">${state.bestPlateStr} (${fmt(state.bestPlatePrice)})</b></div>
+    <div>🔨 Продано на аукционе: <b>${state.auctionSoldCount}</b> · 🤝 Сделок: <b>${state.tradesCompleted}</b></div>
+  `;
+
+  const achBox = document.getElementById('prof-achievements');
+  achBox.innerHTML = '';
+  ACHIEVEMENTS_CONFIG.forEach(ach => {
+    const done = ach.check(state);
+    const claimed = state.claimedAchievements.includes(ach.id);
+    const div = document.createElement('div');
+    div.className = 'mod-pill';
+    div.style.textTransform = 'none';
+    div.innerHTML = `
+      <div>
+        <div style="font-weight:800; font-size:13px;">${ach.title}</div>
+        <div style="font-size:11.5px; color:#22d3ee;">Награда: +${ach.rewardGems} 💎 Кристаллов</div>
+      </div>
+      ${claimed
+        ? `<span class="badge" style="color:var(--green)">✔ Получено</span>`
+        : done
+          ? `<button class="btn-sec gem" style="padding:5px 10px;" onclick="claimAchievementReward('${ach.id}')">🎁 Забрать +${ach.rewardGems} 💎</button>`
+          : `<span style="font-size:11.5px; color:var(--muted)">В процессе</span>`
+      }
+    `;
+    achBox.appendChild(div);
+  });
+
+  const fBox = document.getElementById('friends-list-box');
+  fBox.innerHTML = '';
+  state.friends.forEach((f, idx) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--panel-2); padding:11px; border-radius:11px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;';
+    div.innerHTML = `
+      <div>
+        <div style="font-weight:800; font-size:13.5px;">👤 ${f.name} <span class="badge">ID: ${f.id}</span> <span class="badge" style="color:var(--gold)">Ур. ${f.lvl}</span></div>
+        <div style="font-size:11.5px; color:var(--green); margin-top:3px;">● ${f.status}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-sec sell" onclick="jumpToTradeWithFriend('${f.id}')">🤝 Торговать</button>
+        <button class="btn-sec" onclick="state.friends.splice(${idx},1); renderProfileTab(); saveGame();">✕</button>
+      </div>
+    `;
+    fBox.appendChild(div);
+  });
+
+  const sugBox = document.getElementById('online-suggestions');
+  sugBox.innerHTML = '';
+  ONLINE_PLAYERS.forEach(op => {
+    const already = state.friends.some(x => x.id === op.id);
+    const d = document.createElement('div');
+    d.style.cssText = 'background:var(--panel-2); padding:9px 12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px;';
+    d.innerHTML = `
+      <span><b>${op.name}</b> (ID: ${op.id}) · Ур. ${op.lvl}</span>
+      ${already ? '<span style="color:var(--muted)">В друзьях</span>' : `<button class="btn-sec" style="padding:5px 10px;" onclick="quickAddFriend('${op.id}','${op.name}',${op.lvl})">➕ Дружить</button>`}
+    `;
+    sugBox.appendChild(d);
+  });
+
+  document.getElementById('set-sound-btn').textContent = state.settings.sound ? '🔊 Включены' : '🔇 Выключены';
+  document.getElementById('set-fast-btn').textContent = state.settings.fastRoll ? '⚡ Включена' : 'Выключена';
+}
+
+function copyPlayerId() {
+  navigator.clipboard?.writeText(state.playerId);
+  showToast(`📋 Ваш ID (${state.playerId}) скопирован!`);
+}
+
+function cycleAvatar() {
+  state.avatar = AVATARS[(AVATARS.indexOf(state.avatar) + 1) % AVATARS.length];
+  renderProfileTab(); saveGame();
+}
+
+function addFriendById() {
+  const idInp = document.getElementById('add-friend-id-inp').value.trim();
+  const nameInp = document.getElementById('add-friend-name-inp').value.trim();
+  if (!idInp || idInp.length < 4) { showToast('Введите корректный ID!'); return; }
+  if (state.friends.some(f => f.id === idInp)) { showToast('Уже в друзьях!'); return; }
+  state.friends.push({ id: idInp, name: nameInp || `Игрок_${idInp}`, lvl: 10, status: 'Онлайн' });
+  document.getElementById('add-friend-id-inp').value = '';
+  renderProfileTab(); saveGame();
+}
+
+function quickAddFriend(id, name, lvl) {
+  if (!state.friends.some(f => f.id === id)) {
+    state.friends.push({ id, name, lvl, status: 'Онлайн' });
+    renderProfileTab(); saveGame();
+  }
+}
+
+function jumpToTradeWithFriend(friendId) {
+  switchTab('trade');
+  switchTradeSub('sell');
+  document.getElementById('trade-friend-select').value = friendId;
+  document.getElementById('trade-target-id').value = friendId;
+  updateTradeSliderDisplay();
+}
+
+function toggleSetting(key) {
+  state.settings[key] = !state.settings[key];
+  renderProfileTab(); saveGame();
+}
+
+function changeNickname() {
+  const n = prompt('Введите новый никнейм:', state.nickname);
+  if (n && n.trim()) { state.nickname = n.trim().slice(0,18); renderProfileTab(); updateUI(); saveGame(); }
+}
+
+function exportSaveData() {
+  prompt('Скопируйте код вашего сохранения:', btoa(unescape(encodeURIComponent(JSON.stringify(state)))));
+}
+
+function importSaveData() {
+  const raw = prompt('Вставьте код сохранения:');
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(raw.trim()))));
+    if (parsed && typeof parsed.money === 'number') { state = Object.assign(state, parsed); saveGame(); location.reload(); }
+  } catch(e) { showToast('Ошибка импорта!'); }
+}
+
+function hardResetGame() {
+  if (confirm('Полностью сбросить прогресс?')) { localStorage.removeItem('gosnomer_empire_v5'); location.reload(); }
+}
+
+/* ======================= NAVIGATION & MAIN LOOPS ======================= */
+const LOCATIONS_META = {
+  roller: { title: '📍 Отделение МРЭО ГИБДД', desc: 'Прокрутка номеров и окно выкупа в собственность или мгновенного Госвыкупа' },
+  inventory: { title: '📦 Склад Выкупленных Госномеров', desc: 'Предпросмотр расчёта перед продажей в Гос и на Чёрном рынке' },
+  trade: { title: '🤝 Выкуп с рук и Торги', desc: 'Терпение продавца зависит от редкости номера, все шансы округлены до 0.1%' },
+  auction: { title: '🔨 Центральный Аукцион', desc: 'Ползунок ставок, ускорение продажи своих лотов и сохранение торгов после обновления' },
+  donate: { title: '💎 Официальный Донат-Магазин', desc: 'Покупка кристаллов за реальные деньги и обмен на виртуальные рубли' },
+  skills: { title: '🧠 Древо Навыков (до 25 уровней)', desc: 'Снижение налога на бизнес и продажу номеров, мастерство торга и удача' },
+  cases: { title: '🧰 Склад Спецконтейнеров', desc: 'Рулетка архивных и правительственных серий с точностью шансов до десятых' },
+  steal: { title: '🥷 Ночной Двор и Автосвалка «Чермет»', desc: 'Откручивание 4 болтов и поиск раритетов под прессом' },
+  launder: { title: '🧼 Теневая Прачечная', desc: 'Новые схемы отмыва открываются при покупке Предприятий' },
+  empire: { title: '🚗 Автопарк, Недвижимость и Бизнес', desc: 'Недвижимость даёт несуммирующиеся слоты под авто, а бизнес облагается госналогом' },
+  clan: { title: '🛡️ Штаб Клана и Рейтинг Forbes', desc: 'Приглашение игроков в клан по уникальному ID и таблица лидеров' },
+  profile: { title: '👤 Личный Профиль и Достижения', desc: 'Награды в кристаллах за достижения и +50 💎 каждые 10 уровней' }
+};
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('tab-' + tabId);
+  if (target) target.classList.add('active');
+
+  const map = ['roller','inventory','trade','auction','donate','skills','cases','steal','launder','empire','clan','profile'];
+  document.querySelectorAll('#main-nav button').forEach((b, i) => b.classList.toggle('active', map[i] === tabId));
+
+  const banner = document.getElementById('loc-banner');
+  const meta = LOCATIONS_META[tabId];
+  if (meta && banner) {
+    banner.style.animation = 'none';
+    void banner.offsetWidth;
+    banner.style.animation = 'slideBanner 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+    document.getElementById('loc-title').textContent = meta.title;
+    document.getElementById('loc-desc').textContent = meta.desc;
+  }
+
+  if (tabId === 'inventory') renderInventory();
+  if (tabId === 'trade') {
+    if (secondhandListings.length === 0) generateSecondhandMarket(true);
+    else renderSecondhandMarket();
+    renderTradeTab();
+  }
+  if (tabId === 'auction') renderAuction();
+  if (tabId === 'donate') renderDonateShop();
+  if (tabId === 'skills') renderSkills();
+  if (tabId === 'cases') renderCases();
+  if (tabId === 'steal') resetStealGame();
+  if (tabId === 'launder') renderLaunder();
+  if (tabId === 'empire') renderEmpire();
+  if (tabId === 'clan') renderClanAndForbes();
+  if (tabId === 'profile') renderProfileTab();
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && document.getElementById('tab-steal').classList.contains('active')) {
+    e.preventDefault();
+    hitBolt();
+  }
+});
+
+function updateUI() {
+  document.getElementById('ui-money').textContent = fmt(state.money);
+  document.getElementById('ui-dirty').textContent = fmt(state.dirtyMoney);
+  document.getElementById('ui-gems').textContent = state.gems;
+  document.getElementById('ui-lvl').textContent = `УР. ${state.level}`;
+  document.getElementById('ui-id-pill').textContent = `ID: ${state.playerId}`;
+
+  const needed = getXpNeeded(state.level);
+  document.getElementById('ui-xp-text').textContent = `${state.xp} / ${needed} XP`;
+  document.getElementById('ui-xp-bar').style.width = Math.min(100, (state.xp / needed) * 100) + '%';
+
+  const taxPct = fmtPct(getTaxRate() * 100);
+  document.getElementById('ui-tax').textContent = taxPct;
+  const rTax = document.getElementById('roller-tax-label');
+  if (rTax) rTax.textContent = taxPct;
+
+  document.getElementById('ui-car-slots').textContent = `${Object.keys(state.carsOwned).length}/${getMaxCarSlots()}`;
+  document.getElementById('ui-inv-count').textContent = `${state.inventory.length}/${getMaxInventory()}`;
+  document.getElementById('ui-luck-info').textContent = `Фактор удачи: x${getPlayerLuckFactor().toFixed(2)} (Ур. ${state.level})`;
+
+  const spBadge = document.getElementById('skill-point-badge');
+  spBadge.style.display = state.skillPoints > 0 ? 'inline-block' : 'none';
+  spBadge.textContent = state.skillPoints;
+
+  const hasUnclaimedAch = ACHIEVEMENTS_CONFIG.some(a => a.check(state) && !state.claimedAchievements.includes(a.id));
+  const achBadge = document.getElementById('ach-ready-badge');
+  if (achBadge) achBadge.style.display = hasUnclaimedAch ? 'inline-block' : 'none';
+}
+
+// Fast loop
+setInterval(() => {
+  const now = Date.now();
+
+  if (state.myAuctionListings.length > 0) {
+    let resolvedAny = false;
+    state.myAuctionListings = state.myAuctionListings.filter(item => {
+      if (now >= item.sellAt) {
+        resolveMyAuctionItem(item);
+        resolvedAny = true;
+        return false;
+      }
+      return true;
+    });
+    if (resolvedAny) {
+      if (document.getElementById('tab-auction').classList.contains('active')) renderAuction();
+      updateUI();
+      saveGame();
+    } else {
+      document.querySelectorAll('.my-lot-timer').forEach(el => {
+        const uid = el.getAttribute('data-uid');
+        const found = state.myAuctionListings.find(x => x.uid === uid);
+        if (found) {
+          const s = Math.max(0, Math.ceil((found.sellAt - now) / 1000));
+          const m = Math.floor(s / 60);
+          const sec = s % 60;
+          el.textContent = `${m}:${String(sec).padStart(2,'0')}`;
+        }
+      });
+    }
+  }
+
+  if (state.launderJob) {
+    const elapsed = now - state.launderJob.startTime;
+    const pct = Math.min(100, (elapsed / state.launderJob.totalMs) * 100);
+    const progEl = document.getElementById('launder-prog');
+    const amtEl = document.getElementById('launder-active-amt');
+    const timeEl = document.getElementById('launder-time-left');
+    if (progEl) progEl.style.width = pct + '%';
+    if (amtEl) amtEl.textContent = fmt(state.launderJob.amount);
+    if (timeEl) timeEl.textContent = `Осталось: ${Math.max(0, ((state.launderJob.endTime - now)/1000)).toFixed(1)} сек`;
+
+    if (now >= state.launderJob.endTime) {
+      const out = state.launderJob.cleanOut;
+      state.money += out;
+      state.launderJob = null;
+      if (progEl) progEl.style.width = '0%';
+      if (amtEl) amtEl.textContent = '0 ₽';
+      if (timeEl) timeEl.textContent = 'Готово!';
+      addXp(20);
+      showToast(`🧼 Отмыв завершён! +${fmt(out)} зачислено на Чистый баланс!`);
+      if (document.getElementById('tab-launder').classList.contains('active')) renderLaunder();
+      updateUI();
+      saveGame();
+    }
+  }
+
+  const remMs = state.auctionEndTime - now;
+  if (remMs <= 0) {
+    generateAuctionLots();
+  } else {
+    const mins = Math.floor(remMs / 60000);
+    const secs = Math.floor((remMs % 60000) / 1000);
+    const tEl = document.getElementById('auction-timer');
+    if (tEl) tEl.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  }
+}, 200);
+
+// 1-Second Passive Income & OBEP Raid
+setInterval(() => {
+  const inc = getPassiveIncome();
+  if (inc > 0) {
+    state.money += inc;
+    updateUI();
+  }
+  if (state.dirtyMoney > 50000 && Math.random() < 0.03) {
+    const seized = Math.round(state.dirtyMoney * 0.25);
+    state.dirtyMoney -= seized;
+    showToast(`🚔 Облава ОБЭП! Конфисковано ${fmt(seized)} грязных денег!`);
+    updateUI();
+  }
+}, 1000);
+
+// Boot
+initScrapyard();
+generateAuctionLots();
+generateSecondhandMarket(true);
+resetStealGame();
+updateUI();
+</script>
+</body>
+</html>
