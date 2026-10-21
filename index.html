@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<script src="/sdk.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ГОСНОМЕР: ИМПЕРИЯ 5.0 — Онлайн-Симулятор</title>
+<title>ГОСНОМЕР: ИМПЕРИЯ 6.1 — Симулятор</title>
 <style>
   :root {
     --bg: #07080c;
@@ -465,13 +466,35 @@
     opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 999;
   }
   #toast.show { opacity: 1; }
+.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.fbar input{flex:1;min-width:150px}
+
+.plate-wrap{height:106px;padding:10px 12px;perspective:700px;background:linear-gradient(180deg,#30343c,#17191f 60%,#0e1013);border-radius:14px;border:1px solid #3a3f49;box-shadow:inset 0 2px 3px rgba(255,255,255,.12),0 10px 24px rgba(0,0,0,.7)}
+.plate-box{--bg1:#fbfbf8;--bg2:#e0e0d8;--rim:#14161a;--ink:#14161a;color:var(--ink)!important;border:1px solid #8c9199!important;border-radius:8px!important;padding:7px;transition:transform .35s;
+background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(180deg,var(--bg1),var(--bg2))!important;
+box-shadow:inset 0 0 0 3px var(--bg1),inset 0 0 0 6px var(--rim),inset 0 0 0 7px var(--bg2),inset 0 3px 7px rgba(0,0,0,.28),0 8px 18px rgba(0,0,0,.65)!important}
+.plate-wrap:hover .plate-box{transform:rotateX(5deg) rotateY(-9deg)}
+.plate-main{color:inherit;font-family:'Arial Narrow','Roboto Condensed','Helvetica Neue',Arial,sans-serif;font-weight:900;font-stretch:condensed;letter-spacing:1.5px;padding-left:6px;text-shadow:0 1px 0 rgba(255,255,255,.9),0 -1px 0 rgba(0,0,0,.3),1px 2px 2px rgba(0,0,0,.25)}
+.plate-main .let,.plate-main .let.upper{text-transform:uppercase;font-size:36px}.plate-main .dig{font-size:46px}
+.plate-region-box{border-left:3px solid var(--rim)!important;width:82px;font-family:'Arial Narrow','Roboto Condensed',Arial,sans-serif;color:inherit}.plate-region-num{font-size:31px;font-weight:900}
+.plate-bolt{width:9px;height:9px;background:radial-gradient(circle at 35% 30%,#fff,#aeb4bd 45%,#555b66)}.plate-bolt::after{content:'';position:absolute;left:1px;right:1px;top:50%;height:1px;background:#222;transform:rotate(25deg)}
+.st-police{--bg1:#fff;--bg2:#dbe7fb;--rim:#1d4ed8;--ink:#1d3a8a}.st-army{--bg1:#5d6b2e;--bg2:#3a4519;--rim:#e5e7c8;--ink:#f4f6dd}
+.st-taxi{--bg1:#ffe45c;--bg2:#e6b800}.st-diplo{--bg1:#e03a3a;--bg2:#8f1616;--rim:#fff;--ink:#fff}.st-fsb{--bg1:#2b2d33;--bg2:#0b0c0f;--rim:#d4a017;--ink:#f1c453}
+.st-ambu{--bg1:#fff;--bg2:#f7d4d4;--rim:#dc2626;--ink:#b91c1c}.st-retro{--bg1:#f6e7bd;--bg2:#d8bf84;--rim:#3b2f1a;--ink:#2d2413}
+.st-army .plate-main,.st-diplo .plate-main,.st-fsb .plate-main{text-shadow:0 -1px 0 rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5)}
+.mini-plate{font-family:'Arial Narrow','Roboto Condensed',Arial,sans-serif;letter-spacing:1px;padding:6px 14px;box-shadow:inset 0 0 0 2px #f3f3ef,inset 0 0 0 3px #14161a,0 3px 8px rgba(0,0,0,.45)}
+#group-nav{background:#0b0d13}#group-nav button{font-size:14px;padding:10px 16px}
+.showcase{background:linear-gradient(135deg,rgba(245,158,11,.14),var(--panel-2));border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:12px}
+.box-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.foot{font-size:11px;color:var(--muted);text-align:center;margin-top:26px}
+body{touch-action:manipulation;background-attachment:fixed}
+@media(max-width:600px){header{padding:6px 8px}.stat-pill{padding:4px 7px;font-size:11px}main{padding:10px}nav{padding:6px 8px}nav button{padding:7px 9px;font-size:12px}.brand{font-size:14px}.xp-bar-bg{width:50px}}
 </style>
 </head>
 <body>
 
 <header>
   <div class="brand-wrap">
-    <div class="brand">🚔 <span>ГОСНОМЕР: ИМПЕРИЯ 5.0</span></div>
+    <div class="brand">🚔 <span>ГОСНОМЕР: ИМПЕРИЯ 6.0</span></div>
     <div class="lvl-box" title="Каждые 10 уровней вы получаете бонус +50 Кристаллов!">
       <span class="lvl-badge" id="ui-lvl">УР. 1</span>
       <div>
@@ -485,7 +508,7 @@
 
   <div class="stats-bar">
     <div class="stat-pill clean">💰 Чистые: <span class="val" id="ui-money">3 000 ₽</span></div>
-    <div class="stat-pill dirty">🕶️ Грязные: <span class="val" id="ui-dirty">0 ₽</span></div>
+    <div class="stat-pill dirty">🕶️ Теневые: <span class="val" id="ui-dirty">0 ₽</span></div>
     <div class="stat-pill gem" onclick="switchTab('donate')">💎 Кристаллы: <span class="val" id="ui-gems">30</span> ➕</div>
     <div class="stat-pill">🏛️ Налог: <span class="val" id="ui-tax" style="color:#f87171">35.0%</span></div>
     <div class="stat-pill">🚗 Гараж: <span class="val" id="ui-car-slots">0/0</span></div>
@@ -501,8 +524,8 @@
   <button class="donate-tab" onclick="switchTab('donate')">💎 Донат-Магазин</button>
   <button onclick="switchTab('skills')">🧠 Навыки <span class="nav-badge" id="skill-point-badge" style="display:none">0</span></button>
   <button onclick="switchTab('cases')">🧰 Кейсы</button>
-  <button onclick="switchTab('steal')">🥷 Скрутка и Свалка</button>
-  <button onclick="switchTab('launder')">🧼 Отмыв кэша</button>
+  <button onclick="switchTab('steal')">🥷 Находки и Свалка</button>
+  <button onclick="switchTab('launder')">🧼 Обмен кэша</button>
   <button onclick="switchTab('empire')">🚗 Авто и Бизнес</button>
   <button onclick="switchTab('clan')">🛡️ Клан и Топ</button>
   <button onclick="switchTab('profile')">👤 Профиль <span class="nav-badge" id="ach-ready-badge" style="display:none">!</span></button>
@@ -787,7 +810,7 @@
     <div class="roller-layout">
       <div class="box-card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3>🥷 Ночная скрутка номеров с авто</h3>
+          <h3>🥷 Поиск номеров на заброшенных авто</h3>
           <span class="badge" style="color:#c084fc">4 Болта крепления</span>
         </div>
         <p style="font-size:12.5px; color:var(--muted);">
@@ -835,13 +858,13 @@
   <section id="tab-launder" class="tab-section">
     <div class="roller-layout">
       <div class="box-card">
-        <h3>🧼 Прачечная: Отмыв теневого кэша (Открывается покупкой Предприятий)</h3>
+        <h3>🧼 Обменник: Обмен теневого кэша (Открывается покупкой Предприятий)</h3>
         <p style="font-size:13px; color:var(--muted); line-height:1.5;">
-          Покупка новых видов <b>Предприятий</b> во вкладке «Авто и Бизнес» открывает более крупные и быстрые каналы легализации грязных денег!
+          Покупка новых видов <b>Предприятий</b> во вкладке «Авто и Бизнес» открывает более крупные и быстрые каналы легализации теневых денег!
         </p>
         <div style="background:var(--panel-2); padding:14px; border-radius:14px; border:1px solid var(--border);">
           <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span>В процессе отмыва: <b id="launder-active-amt" style="color:#c084fc">0 ₽</b></span>
+            <span>В процессе обмена: <b id="launder-active-amt" style="color:#c084fc">0 ₽</b></span>
             <span id="launder-time-left">Готово к запуску</span>
           </div>
           <div class="prog-wrap"><div class="prog-fill" id="launder-prog"></div></div>
@@ -855,7 +878,7 @@
       <div class="box-card">
         <h3>🚔 Контроль ОБЭП</h3>
         <p style="font-size:13px; color:var(--muted);">
-          Хранение более <b>50 000 ₽ грязного кэша</b> привлекает внимание ОБЭП. Открывайте предприятия, чтобы отмывать крупные суммы за один цикл!
+          Хранение более <b>50 000 ₽ теневого кэша</b> привлекает внимание ОБЭП. Открывайте предприятия, чтобы обменать крупные суммы за один цикл!
         </p>
         <div style="padding:14px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:12px; font-size:13px;">
           Риск облавы на склад кэша: <b id="obep-risk-txt" style="color:var(--green)">Низкий (0.0%)</b>
@@ -886,7 +909,7 @@
     <h3 style="margin-bottom:12px;">🚗 2. Автопарк (Требуется свободный слот в вашей Недвижимости)</h3>
     <div id="cars-grid" class="grid-3" style="margin-bottom:28px;"></div>
 
-    <h3 style="margin-bottom:12px;">🏭 3. Предприятия (Облагаются госналогом <span id="biz-tax-header">35.0%</span> и открывают схемы Отмыва кэша)</h3>
+    <h3 style="margin-bottom:12px;">🏭 3. Предприятия (Облагаются госналогом <span id="biz-tax-header">35.0%</span> и открывают схемы Обмена кэша)</h3>
     <div id="biz-grid" class="grid-3"></div>
   </section>
 
@@ -954,7 +977,7 @@
             <input id="add-friend-name-inp" placeholder="Имя" style="width:140px;">
             <button class="btn-main" style="padding:9px 14px; font-size:13px;" onclick="addFriendById()">Добавить</button>
           </div>
-          <h3 style="margin-top:14px;">🌐 Игроки онлайн</h3>
+          <h3 style="margin-top:14px;">🌐 Игроки</h3>
           <div id="online-suggestions" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
 
@@ -1178,23 +1201,23 @@ const HOMES_CATALOG = [
 ];
 
 const CARS_CATALOG = [
-  { id: 'vaz2107', name: 'ВАЗ-2107 «Боевая Классика»', cost: 18000, income: 12, img: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=700&q=80' },
-  { id: 'priora', name: 'Lada Priora Black Edition', cost: 55000, income: 38, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=700&q=80' },
-  { id: 'kiario', name: 'Kia Rio Городской Седан', cost: 140000, income: 95, img: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=700&q=80' },
-  { id: 'camry35', name: 'Toyota Camry 3.5 V6 Executive', cost: 420000, income: 290, img: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=700&q=80' },
-  { id: 'bmwm5', name: 'BMW M5 F90 Competition', cost: 1650000, income: 1150, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=700&q=80' },
-  { id: 'merce63', name: 'Mercedes-AMG E63s 4MATIC+', cost: 2900000, income: 2100, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=700&q=80' },
-  { id: 'porsche911', name: 'Porsche 911 Turbo S', cost: 6500000, income: 4800, img: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=700&q=80' },
-  { id: 'gelik', name: 'Mercedes-AMG G63 «Гелик»', cost: 14000000, income: 10500, img: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=700&q=80' },
-  { id: 'urus', name: 'Lamborghini Urus Performante', cost: 28000000, income: 22000, img: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=700&q=80' },
-  { id: 'chiron', name: 'Bugatti Chiron Pur Sport', cost: 85000000, income: 72000, img: 'https://images.unsplash.com/photo-1566008885218-90abf9200ddb?auto=format&fit=crop&w=700&q=80' }
+  { id: 'vaz2107', name: 'ВАЗ-2107 «Боевая Классика»', cost: 18000, income: 12 },
+  { id: 'priora', name: 'Lada Priora Black Edition', cost: 55000, income: 38 },
+  { id: 'kiario', name: 'Kia Rio Городской Седан', cost: 140000, income: 95 },
+  { id: 'camry35', name: 'Toyota Camry 3.5 V6 Executive', cost: 420000, income: 290 },
+  { id: 'bmwm5', name: 'BMW M5 F90 Competition', cost: 1650000, income: 1150 },
+  { id: 'merce63', name: 'Mercedes-AMG E63s 4MATIC+', cost: 2900000, income: 2100 },
+  { id: 'porsche911', name: 'Porsche 911 Turbo S', cost: 6500000, income: 4800 },
+  { id: 'gelik', name: 'Mercedes-AMG G63 «Гелик»', cost: 14000000, income: 10500 },
+  { id: 'urus', name: 'Lamborghini Urus Performante', cost: 28000000, income: 22000 },
+  { id: 'chiron', name: 'Bugatti Chiron Pur Sport', cost: 85000000, income: 72000 }
 ];
 
 const BIZ_CATALOG = [
-  { id: 'shino', name: 'Вагончик Шиномонтажа', cost: 12000, income: 15, desc: 'Открывает схему отмыва «Шиномонтаж» (до 8 000 ₽)' },
-  { id: 'wash', name: 'Автомойка 24/7', cost: 65000, income: 80, desc: 'Открывает схему отмыва «Касса Автомойки» (до 35 000 ₽)' },
-  { id: 'stamp', name: 'Цех Дубликатов Госномеров', cost: 280000, income: 340, desc: 'Открывает схему отмыва «Госзаказ пластин» (до 120 000 ₽)' },
-  { id: 'tuning', name: 'Детейлинг и Кузовной Цех', cost: 1200000, income: 1450, desc: 'Открывает схему отмыва «VIP-Тюнинг» (до 450 000 ₽)' },
+  { id: 'shino', name: 'Вагончик Шиномонтажа', cost: 12000, income: 15, desc: 'Открывает схему обмена «Шиномонтаж» (до 8 000 ₽)' },
+  { id: 'wash', name: 'Автомойка 24/7', cost: 65000, income: 80, desc: 'Открывает схему обмена «Касса Автомойки» (до 35 000 ₽)' },
+  { id: 'stamp', name: 'Цех Дубликатов Госномеров', cost: 280000, income: 340, desc: 'Открывает схему обмена «Госзаказ пластин» (до 120 000 ₽)' },
+  { id: 'tuning', name: 'Детейлинг и Кузовной Цех', cost: 1200000, income: 1450, desc: 'Открывает схему обмена «VIP-Тюнинг» (до 450 000 ₽)' },
   { id: 'dealer', name: 'Премиум Автохолдинг', cost: 9500000, income: 11500, desc: 'Открывает «Международный Холдинг» (до 2 500 000 ₽)' }
 ];
 
@@ -1212,9 +1235,9 @@ const SKILLS_CONFIG = [
   { id: 'mreo_luck', name: 'Связи в МРЭО', max: 25, desc: 'Повышает шанс выпадения редких букв и одинаковых цифр (+12.0% к удаче за ур.)' },
   { id: 'haggle_master', name: 'Гений Переговоров и Торга', max: 25, desc: 'Повышает макс. % наценки (+2.0% за ур.), снижает риск срыва сделки и потерю терпения при торге' },
   { id: 'tax_cut', name: 'Налоговый Оптимизатор', max: 20, desc: 'Снижает госналог на продажу номеров И налог на прибыль Предприятий на 1.5% за уровень (с 35.0% до 5.0%)' },
-  { id: 'nimble_hands', name: 'Ловкие Пальцы', max: 20, desc: 'Расширяет зелёную зону открутки болтов и замедляет бегунок при ночной скрутке' },
+  { id: 'nimble_hands', name: 'Ловкие Пальцы', max: 20, desc: 'Расширяет зелёную зону открутки болтов и замедляет бегунок при ночном поиске' },
   { id: 'restorer', name: 'Мастер Реставрации', max: 20, desc: 'Снижает стоимость ремонта битых номеров «После ДТП» и госпошлину выкупа в МРЭО' },
-  { id: 'launder_pro', name: 'Теневой Прачка', max: 20, desc: 'Снижает комиссию отмыва на 1.0% и риск облавы ОБЭП на чёрном рынке на 0.8% за уровень' }
+  { id: 'launder_pro', name: 'Теневой Прачка', max: 20, desc: 'Снижает комиссию обмена на 1.0% и риск облавы ОБЭП на чёрном рынке на 0.8% за уровень' }
 ];
 
 const ACHIEVEMENTS_CONFIG = [
@@ -1274,8 +1297,8 @@ let state = {
   pendingRolledPlate: null,
   myAuctionListings: [],
   friends: [
-    { id: '777001', name: 'Руслан_АМР', lvl: 16, status: 'Онлайн · На аукционе' },
-    { id: '890412', name: 'Дима_Перекуп', lvl: 9, status: 'Онлайн · Ищет номера' },
+    { id: '777001', name: 'Руслан_АМР', lvl: 16, status: 'Недавно · На аукционе' },
+    { id: '890412', name: 'Дима_Перекуп', lvl: 9, status: 'Недавно · Ищет номера' },
     { id: '102944', name: 'Алихан_01KZ', lvl: 24, status: 'В МРЭО Астаны' }
   ],
   settings: { sound: true, fastRoll: false },
@@ -1863,7 +1886,7 @@ function openSalePreviewModal(targetType, mode, uid = null) {
     document.getElementById('sp-channel-name').innerHTML = '<span style="color:#c084fc">🕶️ Чёрный рынок (Барыгам без налога)</span>';
     document.getElementById('sp-tax-or-risk-lbl').textContent = 'Вероятность облавы ОБЭП:';
     document.getElementById('sp-tax-or-risk-val').textContent = fmtPct(stingChance * 100) + ' (Риск конфискации и штрафа)';
-    document.getElementById('sp-net-payout').textContent = fmt(marketTotal) + ' (В Грязный кэш)';
+    document.getElementById('sp-net-payout').textContent = fmt(marketTotal) + ' (В Теневой кэш)';
     document.getElementById('sp-net-payout').style.color = '#c084fc';
   }
 
@@ -1925,7 +1948,7 @@ function executeSinglePlateSale(uid, mode) {
     } else {
       state.blackMarketSuccess++;
       state.dirtyMoney += plate.price;
-      showToast(`🕶️ Сделка на чёрном рынке успешна: +${fmt(plate.price)} в Грязный кэш!`);
+      showToast(`🕶️ Сделка на чёрном рынке успешна: +${fmt(plate.price)} в Теневой кэш!`);
       addXp(14);
     }
   }
@@ -1973,7 +1996,7 @@ function executeBulkPlateSale(mode) {
     state.dirtyMoney += totalEarned;
     showToast(caughtCount > 0
       ? `🕶️ Слито на +${fmt(totalEarned)}, но ${caughtCount} шт. перехватил ОБЭП (штраф -${fmt(fineTotal)})!`
-      : `🕶️ Все ${candidates.length} номеров успешно слиты: +${fmt(totalEarned)} грязными!`);
+      : `🕶️ Все ${candidates.length} номеров успешно слиты: +${fmt(totalEarned)} теневыми!`);
   }
   updateUI();
   renderInventory();
@@ -2926,7 +2949,7 @@ function renderEmpire() {
     div.innerHTML = `
       <div>
         <div class="car-photo-stage">
-          <img src="${c.img}" alt="${c.name}" loading="lazy">
+          <div style="font-size:70px;display:flex;height:100%;align-items:center;justify-content:center">🚘</div>
           <div class="car-plate-badge">${eqPlate ? formatPlateString(eqPlate) : 'БЕЗ НОМЕРА'}</div>
         </div>
         <h3 style="margin-top:10px;">${c.name}</h3>
@@ -2955,7 +2978,7 @@ function renderEmpire() {
         <h3>🏭 ${b.name} <span class="badge">Ур. ${cnt}</span></h3>
         <p style="font-size:12px; color:#c084fc; margin:6px 0;">🧼 ${b.desc}</p>
         <p style="font-size:12px; color:var(--muted);">
-          Грязная выручка: ${fmt(b.income)}/сек<br>
+          Теневая выручка: ${fmt(b.income)}/сек<br>
           Чистыми после госналога (-${fmtPct(tax*100)}): <b style="color:var(--green)">+${fmt(netInc)}/сек</b>
         </p>
       </div>
@@ -2998,7 +3021,7 @@ function buyBiz(id) {
   state.money -= cost;
   state.bizOwned[id] = cnt + 1;
   addXp(30);
-  if (cnt === 0) showToast(`🏭 Предприятие «${b.name}» открыто! Разблокирована новая схема Отмыва кэша!`);
+  if (cnt === 0) showToast(`🏭 Предприятие «${b.name}» открыто! Разблокирована новая схема Обмена кэша!`);
   renderEmpire(); updateUI(); saveGame();
 }
 
@@ -3167,7 +3190,7 @@ function hitBolt() {
       state.inventory.unshift(plate);
       document.getElementById('steal-mystery-text').textContent = formatPlateString(plate);
       addXp(22);
-      showToast(`🥷 Номер ${formatPlateString(plate)} скручен! Оценка: ${fmt(plate.price)}.`);
+      showToast(`🥷 Номер ${formatPlateString(plate)} найден! Оценка: ${fmt(plate.price)}.`);
       updateUI();
       saveGame();
       setTimeout(resetStealGame, 1500);
@@ -3247,7 +3270,7 @@ function renderLaunder() {
         <p style="font-size:12.5px;">К получению чистыми: <b style="color:var(--green)">${fmt(cleanOut)}</b></p>
       </div>
       ${unlocked
-        ? `<button class="btn-sec dirty" ${state.launderJob || amt <= 0 ? 'disabled' : ''} onclick="startLaunder('${sc.id}')">Отмыть (${fmt(amt)})</button>`
+        ? `<button class="btn-sec dirty" ${state.launderJob || amt <= 0 ? 'disabled' : ''} onclick="startLaunder('${sc.id}')">Обменять (${fmt(amt)})</button>`
         : `<button class="btn-sec" onclick="switchTab('empire')">🏭 Купить бизнес для открытия</button>`}
     `;
     grid.appendChild(div);
@@ -3505,14 +3528,14 @@ function addFriendById() {
   const nameInp = document.getElementById('add-friend-name-inp').value.trim();
   if (!idInp || idInp.length < 4) { showToast('Введите корректный ID!'); return; }
   if (state.friends.some(f => f.id === idInp)) { showToast('Уже в друзьях!'); return; }
-  state.friends.push({ id: idInp, name: nameInp || `Игрок_${idInp}`, lvl: 10, status: 'Онлайн' });
+  state.friends.push({ id: idInp, name: nameInp || `Игрок_${idInp}`, lvl: 10, status: 'Недавно в игре' });
   document.getElementById('add-friend-id-inp').value = '';
   renderProfileTab(); saveGame();
 }
 
 function quickAddFriend(id, name, lvl) {
   if (!state.friends.some(f => f.id === id)) {
-    state.friends.push({ id, name, lvl, status: 'Онлайн' });
+    state.friends.push({ id, name, lvl, status: 'Недавно в игре' });
     renderProfileTab(); saveGame();
   }
 }
@@ -3561,8 +3584,8 @@ const LOCATIONS_META = {
   donate: { title: '💎 Официальный Донат-Магазин', desc: 'Покупка кристаллов за реальные деньги и обмен на виртуальные рубли' },
   skills: { title: '🧠 Древо Навыков (до 25 уровней)', desc: 'Снижение налога на бизнес и продажу номеров, мастерство торга и удача' },
   cases: { title: '🧰 Склад Спецконтейнеров', desc: 'Рулетка архивных и правительственных серий с точностью шансов до десятых' },
-  steal: { title: '🥷 Ночной Двор и Автосвалка «Чермет»', desc: 'Откручивание 4 болтов и поиск раритетов под прессом' },
-  launder: { title: '🧼 Теневая Прачечная', desc: 'Новые схемы отмыва открываются при покупке Предприятий' },
+  steal: { title: '🥷 Ночной поиск и Автосвалка «Чермет»', desc: 'Откручивание 4 болтов и поиск раритетов под прессом' },
+  launder: { title: '🧼 Теневая Обменник', desc: 'Новые схемы обмена открываются при покупке Предприятий' },
   empire: { title: '🚗 Автопарк, Недвижимость и Бизнес', desc: 'Недвижимость даёт несуммирующиеся слоты под авто, а бизнес облагается госналогом' },
   clan: { title: '🛡️ Штаб Клана и Рейтинг Forbes', desc: 'Приглашение игроков в клан по уникальному ID и таблица лидеров' },
   profile: { title: '👤 Личный Профиль и Достижения', desc: 'Награды в кристаллах за достижения и +50 💎 каждые 10 уровней' }
@@ -3689,7 +3712,7 @@ setInterval(() => {
       if (amtEl) amtEl.textContent = '0 ₽';
       if (timeEl) timeEl.textContent = 'Готово!';
       addXp(20);
-      showToast(`🧼 Отмыв завершён! +${fmt(out)} зачислено на Чистый баланс!`);
+      showToast(`🧼 Обмен завершён! +${fmt(out)} зачислено на Чистый баланс!`);
       if (document.getElementById('tab-launder').classList.contains('active')) renderLaunder();
       updateUI();
       saveGame();
@@ -3717,7 +3740,7 @@ setInterval(() => {
   if (state.dirtyMoney > 50000 && Math.random() < 0.03) {
     const seized = Math.round(state.dirtyMoney * 0.25);
     state.dirtyMoney -= seized;
-    showToast(`🚔 Облава ОБЭП! Конфисковано ${fmt(seized)} грязных денег!`);
+    showToast(`🚔 Облава ОБЭП! Конфисковано ${fmt(seized)} теневых денег!`);
     updateUI();
   }
 }, 1000);
@@ -3729,224 +3752,304 @@ generateSecondhandMarket(true);
 resetStealGame();
 updateUI();
 </script>
-<!-- ПОДКЛЮЧЕНИЕ МУЛЬТИПЛЕЕРА SOCKET.IO -->
-<script src="/socket.io/socket.io.js"></script>
 <script>
-(function initMultiplayer() {
-  if (typeof io === 'undefined') {
-    console.warn('Игра запущена локально без сервера (одиночный режим).');
-    return;
-  }
+/* ===== МОД 6.0 ===== */
+const $=id=>document.getElementById(id), rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
+function normState(){
+  state.rb=Object.assign({count:0,stars:0,upg:{}},state.rb||{});
+  state.rb.upg=Object.assign({inc:0,luck:0,tax:0,start:0},state.rb.upg);
+  state.bz=state.bz||{}; state.raidLog=state.raidLog||[];
+  state.dream=Object.assign({land:false,ticket:false,won:false},state.dream||{});
+}
+normState();
 
-  const socket = io();
-  let liveOnlinePlayers = [];
+/* ---- Яндекс Игры ---- */
+let ysdk=null,yplayer=null,ySaveT=null;
+if(window.YaGames){YaGames.init().then(async s=>{
+  ysdk=s;
+  try{yplayer=await ysdk.getPlayer({scopes:false});const d=await yplayer.getData();
+    if(d&&d.state&&(d.state._ts||0)>(state._ts||0)){Object.assign(state,d.state);normState();updateUI();}}catch(e){}
+  try{const pay=await ysdk.getPayments({signed:false});const ps=await pay.getPurchases();
+    for(const p of ps){const pk=DONATE_PACKS.find(x=>x.id===p.productID);if(pk){state.gems+=pk.gems+pk.bonus;await pay.consumePurchase(p.purchaseToken);}}
+    if(ps.length){updateUI();saveGame();}}catch(e){}
+  try{ysdk.features.LoadingAPI&&ysdk.features.LoadingAPI.ready();}catch(e){}
+  const pm=$('pay-method-sel');if(pm)pm.style.display='none';
+}).catch(()=>{});}
+const _sg=saveGame;
+saveGame=function(){state._ts=Date.now();_sg();clearTimeout(ySaveT);ySaveT=setTimeout(()=>{if(yplayer)yplayer.setData({state}).catch(()=>{});},4000);};
+document.addEventListener('visibilitychange',()=>{try{if(audioCtx)document.hidden?audioCtx.suspend():audioCtx.resume();}catch(e){}});
+function grantPack(pk){state.gems+=pk.gems+pk.bonus;playTone(280,'sine',.3,.35);showToast(`✅ Зачислено +${pk.gems+pk.bonus} 💎`);closePaymentModal();renderDonateShop();updateUI();saveGame();}
+confirmRealPayment=async function(){
+  const pk=selectedDonatePack;if(!pk)return;
+  if(!ysdk){grantPack(pk);return;} // локальный тест вне Яндекса
+  try{const pay=await ysdk.getPayments({signed:false});const pu=await pay.purchase({id:pk.id});await pay.consumePurchase(pu.purchaseToken);grantPack(pk);}
+  catch(e){showToast('Оплата отменена или недоступна');closePaymentModal();}
+};
+function watchAd(){
+  if(!ysdk){showToast('Реклама доступна после публикации в Яндекс Играх');return;}
+  ysdk.adv.showRewardedVideo({callbacks:{onRewarded(){state.gems+=3;showToast('📺 +3 💎 за просмотр!');updateUI();saveGame();},onError(){showToast('Реклама сейчас недоступна');}}});
+}
+function fullAd(){try{ysdk&&ysdk.adv.showFullscreenAdv({callbacks:{}});}catch(e){}}
 
-  // 1. Регулярная отправка своего профиля на сервер
-  function syncMyProfileToServer() {
-    socket.emit('player_sync', {
-      playerId: state.playerId,
-      nickname: state.nickname,
-      level: state.level,
-      networth: getNetWorth()
-    });
-  }
+/* ---- Стили номеров ---- */
+const STYLES=[
+ {id:'police',n:'Полиция',i:'🚔',m:6,w:2.2,css:'st-police'},{id:'army',n:'Армия',i:'🪖',m:8,w:1.6,css:'st-army'},
+ {id:'taxi',n:'Такси',i:'🚕',m:3,w:3.5,css:'st-taxi'},{id:'ambu',n:'Скорая',i:'🚑',m:4,w:2,css:'st-ambu'},
+ {id:'retro',n:'Ретро ГОСТ',i:'🕰️',m:7,w:1.2,css:'st-retro'},{id:'diplo',n:'Дипломат',i:'🏛️',m:14,w:.8,css:'st-diplo'},
+ {id:'fsb',n:'Спецслужбы',i:'🕶️',m:25,w:.4,css:'st-fsb'}];
+function applyStyle(p){
+  let r=Math.random()*STYLES.reduce((a,s)=>a+s.w,0),st=STYLES[0];
+  for(const s of STYLES){if(r<s.w){st=s;break;}r-=s.w;}
+  p.style=st.id;p.mods.push({label:'СТИЛЬ: '+st.n.toUpperCase(),mult:st.m,color:'#f59e0b'});
+  p.price=Math.round(p.price*st.m);p.stepPrices.push(p.price);
+  for(let i=RARITIES.length-1;i>=0;i--)if(p.price>=RARITIES[i].minPrice){p.rarity=i;break;}
+}
+const _gen=generatePlateData;
+generatePlateData=function(c,s,fr=null){
+  const p=_gen(c,s,fr);
+  if(fr===null&&s!=='scrap'&&Math.random()<(s==='vip'?.22:s==='steal'?.05:.09)+state.rb.upg.luck*.01)applyStyle(p);
+  return p;};
+const _fps=formatPlateString;
+formatPlateString=p=>(p.style?(STYLES.find(s=>s.id===p.style)||{i:''}).i+' ':'')+_fps(p);
+const _rpb=renderPlateInsideBox;
+renderPlateInsideBox=function(p){_rpb(p);const b=$('plate-visual');STYLES.forEach(s=>b.classList.remove(s.css));
+  const st=STYLES.find(s=>s.id===p.style);if(st)b.classList.add(st.css);};
 
-  socket.on('connect', () => {
-    showToast('🌐 Подключено к онлайн-серверу! Вы в сети.');
-    syncMyProfileToServer();
-  });
+/* ---- Фильтры ---- */
+const FIL={q:'',r:'',c:'',s:'',o:''};
+function filterBar(){
+  const o=(v,t)=>`<option value="${v}">${t}</option>`;
+  return `<div class="fbar"><input class="fi" data-k="q" placeholder="🔎 Поиск (А777АА, 777…)" oninput="setFil(this)">
+  <select class="fi" data-k="r" onchange="setFil(this)">${o('','Любая редкость')+RARITIES.map(r=>o(r.id,r.name)).join('')}</select>
+  <select class="fi" data-k="c" onchange="setFil(this)">${o('','Все страны')+o('RU','🇷🇺 РФ')+o('BY','🇧🇾 РБ')+o('KZ','🇰🇿 РК')}</select>
+  <select class="fi" data-k="s" onchange="setFil(this)">${o('','Любой стиль')+o('none','Обычный')+STYLES.map(s=>o(s.id,s.i+' '+s.n)).join('')}</select>
+  <select class="fi" data-k="o" onchange="setFil(this)">${o('','Без сортировки')+o('pd','Дорогие сверху')+o('pa','Дешёвые сверху')+o('rd','По редкости')}</select></div>`;}
+function matches(p){
+  if(FIL.q&&!(formatPlateString(p)+' '+p.digits+p.letters).toUpperCase().includes(FIL.q.toUpperCase()))return false;
+  if(FIL.r!==''&&p.rarity!=FIL.r)return false;if(FIL.c&&p.country!==FIL.c)return false;
+  if(FIL.s==='none'&&p.style)return false;if(FIL.s&&FIL.s!=='none'&&p.style!==FIL.s)return false;return true;}
+function setFil(el){FIL[el.dataset.k]=el.value;
+  document.querySelectorAll('.fi').forEach(e=>{if(e!==el&&e.dataset.k===el.dataset.k)e.value=el.value;});
+  renderInventory();renderSecondhandMarket();renderAuction();}
+const _ri=renderInventory;
+renderInventory=function(){const all=state.inventory;let f=all.filter(matches);
+  if(FIL.o==='pd')f.sort((a,b)=>b.price-a.price);if(FIL.o==='pa')f.sort((a,b)=>a.price-b.price);if(FIL.o==='rd')f.sort((a,b)=>b.rarity-a.rarity);
+  state.inventory=f;try{_ri();}finally{state.inventory=all;}upgradePlates($('inventory-grid'),f);};
+const _rsm=renderSecondhandMarket;renderSecondhandMarket=function(){_rsm();const g=$('secondhand-grid');if(g)[...g.children].forEach((e,i)=>e.style.display=matches(secondhandListings[i].plate)?'':'none');upgradePlates(g,secondhandListings);};
+const _rau=renderAuction;renderAuction=function(){_rau();const g=$('auction-grid');if(g)[...g.children].forEach((e,i)=>e.style.display=matches(auctionLots[i].plate)?'':'none');upgradePlates(g,auctionLots);};
 
-  setInterval(syncMyProfileToServer, 4000);
+/* ---- Бизнес: охрана, прокачка, рейды ---- */
+const GUARDS=[{n:'Сторож',i:'👴',f:.10,c:.02},{n:'Охранник ЧОП',i:'💂',f:.25,c:.06},{n:'Боец бригады',i:'🥊',f:.6,c:.15},{n:'Спецназ в отставке',i:'🎖️',f:1.4,c:.35},{n:'ЧВК-отряд',i:'🪖',f:3.5,c:.8}];
+const CREWS=[{n:'Шпана с района',p:1,c:.35},{n:'Бригада',p:1.7,c:.6},{n:'Штурмовая группа',p:2.3,c:.85}];
+const bzOf=id=>state.bz[id]||(state.bz[id]={lvl:0,g:[0,0,0,0,0]}), bizCnt=id=>state.bizOwned[id]||0;
+const unitOf=b=>Math.max(10,Math.round(b.cost/400)), needOf=b=>unitOf(b)*bizCnt(b.id), slotsOf=b=>(4+2*bzOf(b.id).lvl)*Math.max(1,bizCnt(b.id));
+const upCost=b=>Math.round(b.cost*.6*Math.pow(1.7,bzOf(b.id).lvl));
+function defOf(b){const z=bzOf(b.id);let d=0;z.g.forEach((n,i)=>d+=n*GUARDS[i].f*unitOf(b));return d*(1+.15*z.lvl)*(1+(state.clan?state.clan.level*.05:0));}
+function bzHire(id,i){const b=BIZ_CATALOG.find(x=>x.id===id),z=bzOf(id),cost=Math.round(b.cost*GUARDS[i].c);
+  if(z.g.reduce((a,x)=>a+x,0)>=slotsOf(b)){showToast('Нет свободных постов охраны — прокачайте бизнес');return;}
+  if(state.money<cost){showToast(`Нужно ${fmt(cost)}`);return;}
+  state.money-=cost;z.g[i]++;playTone(200,'sine',.15,.25);renderBz();updateUI();saveGame();}
+function bzUp(id){const b=BIZ_CATALOG.find(x=>x.id===id),z=bzOf(id),c=upCost(b);
+  if(z.lvl>=10)return;if(state.money<c){showToast(`Нужно ${fmt(c)}`);return;}
+  state.money-=c;z.lvl++;addXp(25);showToast(`⬆️ «${b.name}» → ур. ${z.lvl}: доход и защита выросли`);renderBz();updateUI();saveGame();}
+const _gtax=getTaxRate;getTaxRate=()=>Math.max(.03,_gtax()-state.rb.upg.tax*.01);
+const _glf=getPlayerLuckFactor;getPlayerLuckFactor=()=>_glf()+state.rb.upg.luck*.1;
+getPassiveIncome=function(){
+  let g=0;BIZ_CATALOG.forEach(b=>{const n=bizCnt(b.id);if(n)g+=b.income*n*(1+.2*bzOf(b.id).lvl);});
+  let t=Math.round(g*(1-getTaxRate()));
+  for(const cId in state.carsOwned){const c=CARS_CATALOG.find(x=>x.id===cId);if(!c)continue;let v=c.income;
+    const pl=state.carsOwned[cId].plateUid&&state.inventory.find(p=>p.uid===state.carsOwned[cId].plateUid);if(pl)v+=Math.floor(pl.price*.0015);t+=v;}
+  if(state.clan)t=Math.floor(t*(1+state.clan.level*.05+(state.clan.members?state.clan.members.length:1)*.02));
+  return Math.floor(t*(1+.1*state.rb.upg.inc+.15*state.rb.count));};
+const GANGS=['Синдикат «Таганский»','Холдинг «Люберецкий»','Консорциум «Красные Бейсболки»','Синдикат «Северяне»','Картель «Регион 95»','Группа «Казанский феномен»'];
+function randomAttacker(){ // игроки и боты неотличимы
+  if(Math.random()<.5)return pick(GANGS);const b=pick(RIVAL_BOTS);return `${b.name.replace(' (Онлайн)','')} (ID ${b.id})`;}
+function bzLog(t){state.raidLog.unshift(new Date().toLocaleTimeString('ru-RU').slice(0,5)+' · '+t);state.raidLog.length=Math.min(state.raidLog.length,10);
+  if($('tab-bz').classList.contains('active'))renderBz();}
+setInterval(()=>{
+  const owned=BIZ_CATALOG.filter(b=>bizCnt(b.id));if(!owned.length||Math.random()>.25)return;
+  const b=pick(owned),need=needOf(b),def=defOf(b),att=randomAttacker();
+  if(Math.random()<Math.min(.75,def/need*.3+bzOf(b.id).lvl*.03))return; // охраняемых бизнесов трогают реже
+  const power=need*rnd(.5,1.5)*(1+state.rb.count*.1);
+  if(def>=power){addXp(10);showToast(`🛡️ Рейд ${att} на «${b.name}» отбит!`);bzLog(`Отбит рейд: ${att} → «${b.name}»`);}
+  else{const loss=Math.round(Math.min(state.money*.2,Math.max(500,getPassiveIncome()*rnd(60,240))));state.money-=loss;
+    playTone(55,'sawtooth',.4,.35);showToast(`🔫 ${att} атаковали «${b.name}»! Потеряно ${fmt(loss)}`);bzLog(`Рейд: ${att} → «${b.name}», потеряно ${fmt(loss)}`);updateUI();saveGame();}
+},20000);
 
-  // 2. Получение глобальных уведомлений сервера
-  socket.on('server_broadcast', (msg) => {
-    showToast(msg);
-  });
+/* ---- Наши рейды (рэкет) ---- */
+let targets=[],tgtAt=0,atkCd=0;
+function genTargets(){targets=[];const names=RIVAL_BOTS.map(b=>b.name.replace(' (Онлайн)','')).concat(['Лёха_Гараж','Сеня_Шиномонтаж','Борис_Автохолдинг','Тигран_Мойка','Витёк_ЦехДубль']);
+  for(let i=0;i<6;i++){const nm=pick(names);targets.push({name:nm,id:String(Math.floor(100000+Math.random()*899999)),lvl:Math.max(1,state.level+Math.round(rnd(-3,5))),k:rnd(.5,1.7),
+    loot:Math.round(Math.max(8000,getNetWorth()*.015)*rnd(.6,1.4))});}
+  tgtAt=Date.now()+180000;}
+function bzAttack(i,c){
+  if(Date.now()<atkCd){showToast('Бойцы ещё не вернулись, подождите');return;}
+  const t=targets[i],cr=CREWS[c];if(!t)return;const cost=Math.round(t.loot*cr.c);
+  if(state.money<cost){showToast(`Нужно ${fmt(cost)} на бойцов`);return;}
+  state.money-=cost;atkCd=Date.now()+15000;const ch=Math.min(.9,Math.max(.1,cr.p/t.k*.45));
+  if(Math.random()<ch){state.dirtyMoney+=t.loot;addXp(35);playTone(240,'sine',.25,.3);showToast(`🥷 Рейд на ${t.name} удался! +${fmt(t.loot)} теневыми`);targets.splice(i,1);}
+  else{playTone(60,'sawtooth',.3,.3);showToast(`❌ Рейд на ${t.name} провалился, бойцы потеряны (-${fmt(cost)})`);}
+  renderBz();updateUI();saveGame();}
+function renderBz(){
+  if(Date.now()>tgtAt||!targets.length)genTargets();
+  const owned=BIZ_CATALOG.filter(b=>bizCnt(b.id));
+  let h=`<div class="box-card" style="margin-bottom:16px"><h3>🛡️ Крыша: охрана и прокачка бизнеса</h3><p style="font-size:12.5px;color:var(--muted)">Чужие синдикаты и игроки атакуют на ваши предприятия. Нанимайте охрану и прокачивайте бизнес: растёт доход и защита, реже рейды, меньше потерь.</p></div><div class="grid-3">`;
+  if(!owned.length)h+='<p style="color:var(--muted)">Нет предприятий. Откройте их во вкладке «Авто и Бизнес».</p>';
+  owned.forEach(b=>{const z=bzOf(b.id),need=needOf(b),def=defOf(b),pct=Math.min(100,def/need*100),used=z.g.reduce((a,x)=>a+x,0);
+    h+=`<div class="box-card"><div><h3>${b.name} <span class="badge">×${bizCnt(b.id)} · ур. ${z.lvl}/10</span></h3>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0">Доход: <b style="color:var(--green)">+${fmt(Math.round(b.income*bizCnt(b.id)*(1+.2*z.lvl)*(1-getTaxRate())))}/сек</b> · Посты охраны: ${used}/${slotsOf(b)}</p>
+    <div style="font-size:12px">🛡️ Защита: ${Math.round(pct)}% от угрозы</div><div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${GUARDS.map((g,i)=>`<button class="btn-sec" onclick="bzHire('${b.id}',${i})">${g.i} ${g.n} (${z.g[i]})<br><small>${fmt(Math.round(b.cost*g.c))}</small></button>`).join('')}
+    <button class="btn-sec auc" style="grid-column:span 2" ${z.lvl>=10?'disabled':''} onclick="bzUp('${b.id}')">⬆️ Прокачать (${fmt(upCost(b))}): доход +20%, защита +15%</button></div></div>`;});
+  h+=`</div><h3 style="margin:20px 0 10px">🥷 Рейды на чужие бизнесы</h3><div class="grid-3">`;
+  targets.forEach((t,i)=>{h+=`<div class="box-card"><div><h3>👤 ${t.name} <span class="badge">ID ${t.id}</span></h3><p style="font-size:12px;color:var(--muted);margin-top:4px">Ур. ${t.lvl} · <span style="color:var(--green)">● В игре</span><br>Охрана: <b>${t.k<.9?'слабая':t.k<1.3?'средняя':'сильная'}</b> · Добыча: <b style="color:#c084fc">${fmt(t.loot)}</b></p></div>
+    <div style="display:flex;flex-direction:column;gap:6px">${CREWS.map((c,j)=>`<button class="btn-sec dirty" onclick="bzAttack(${i},${j})">${c.n} · ${fmt(Math.round(t.loot*c.c))} · шанс ${Math.round(Math.min(.9,Math.max(.1,c.p/t.k*.45))*100)}%</button>`).join('')}</div></div>`;});
+  h+=`</div><button class="btn-sec" style="margin-top:12px" onclick="genTargets();renderBz()">🔄 Другие цели</button>
+  <h3 style="margin:20px 0 10px">📜 Журнал рейдов</h3><div class="box-card" style="font-size:12.5px;gap:6px">${state.raidLog.length?state.raidLog.map(x=>`<div>${x}</div>`).join(''):'<span style="color:var(--muted)">Пока тихо…</span>'}</div>`;
+  $('bz-root').innerHTML=h;}
 
-  // 3. Обновление списка реальных игроков онлайн (Forbes + вкладка Друзья)
-  socket.on('online_players_update', (playersList) => {
-    liveOnlinePlayers = playersList.filter(p => p.id !== state.playerId);
+/* ---- Forbes, рейтинг номера, мечта и перерождение ---- */
+[['Олигарх_Тверской',610e6],['Магнат_Сити',420e6],['Князь_Барвиха',330e6],['Депутат_АМР',180e6],['Хан_Алматы',150e6],['Прокурор_Вилла',120e6],['Босс_Лужников',95e6],['Тамерлан_Шымкент',64e6],['Батя_Минск',41e6],['Кузьмич_ГСК',8e6],['Леший_Урал',1.2e6],['Витя_Пластина',640e3],['Ксюша_Номера',310e3]]
+ .forEach(([name,nw])=>RIVAL_BOTS.push({name,id:String(Math.floor(100000+Math.random()*899999)),lvl:Math.max(3,Math.round(Math.log10(nw)*6-20)),nw}));
+RIVAL_BOTS.forEach(b=>{b.bp=b.bp||Math.round(b.nw*rnd(.02,.08));});
+setInterval(()=>RIVAL_BOTS.forEach(b=>{if(b.id!=='409112')b.nw=Math.round(b.nw*1.0001);}),5000);
+const forbesRank=()=>1+RIVAL_BOTS.filter(b=>b.nw>getNetWorth()).length;
+const _rcf=renderClanAndForbes;renderClanAndForbes=function(){_rcf();document.querySelectorAll('#leaderboard-table tbody tr').forEach((tr,i)=>{if(i<10)tr.children[0].innerHTML+=' 🏆';});};
+function bestUpdate(){state.inventory.concat(state.myAuctionListings.map(l=>l.plate)).forEach(p=>{if(p.price>state.bestPlatePrice){state.bestPlatePrice=p.price;state.bestPlateStr=formatPlateString(p);}});}
+const _rpt=renderProfileTab;renderProfileTab=function(){_rpt();bestUpdate();
+  const rk=1+RIVAL_BOTS.filter(b=>b.bp>state.bestPlatePrice).length,top=RIVAL_BOTS.slice().sort((a,b)=>b.bp-a.bp).slice(0,3);
+  $('prof-detailed-stats').insertAdjacentHTML('beforeend',`<div style="border-top:1px solid var(--border);padding-top:8px">🏅 <b>Личный рейтинг самого дорогого номера:</b> <b style="color:var(--gold)">#${rk} из ${RIVAL_BOTS.length+1}</b><br><span style="color:var(--muted);font-size:12px">Ваш: ${state.bestPlateStr} (${fmt(state.bestPlatePrice)}) · Лидеры: ${top.map(b=>b.name+' '+fmt(b.bp)).join(' · ')}</span></div>
+  <div>♻️ Перерождений: <b>${state.rb.count}</b> · 🌟 Звёзды: <b>${state.rb.stars}</b> · 💼 Forbes: <b>#${forbesRank()}</b></div>`);};
+const PRICE_LAND=920e6,PRICE_TICKET=80e6;
+const PERKS=[['inc','📈 Доход','+10% к доходу за ур.',20],['luck','🍀 Удача','+0.1 к удаче и шанс стилей',20],['tax','🏛️ Налоги','−1% налога за ур.',20],['start','💵 Старт','+25 000 ₽ в начале жизни',10]];
+const rbNeed=()=>20e6*(state.rb.count+1), rbStars=()=>Math.floor(Math.sqrt(getNetWorth()/5e6));
+function renderDream(){
+  const rk=forbesRank(),inF=rk<=10,d=state.dream,pct=Math.min(100,state.money/1e9*100),nw=getNetWorth();
+  let h=`<div class="box-card" style="margin-bottom:16px;background:linear-gradient(90deg,rgba(168,85,247,.18),var(--panel))"><h2>🍷 Мечта: винодельня в Италии</h2>
+  <p style="font-size:13px;color:var(--muted)">Войдите в Forbes (топ-10), накопите <b>1 000 000 000 ₽</b> чистыми, купите участок под винодельню (${fmt(PRICE_LAND)}) и билет в Италию (${fmt(PRICE_TICKET)}).</p></div>
+  <div class="roller-layout"><div class="box-card">
+  <div>${inF?'✅':'⬜'} 1. Попасть в Forbes: ваше место <b>#${rk}</b> (нужен топ-10)</div>
+  <div>${d.land?'✅':'⬜'} 2. Участок под винодельню — ${fmt(PRICE_LAND)}</div>
+  <div>${d.ticket?'✅':'⬜'} 3. Билет в Италию — ${fmt(PRICE_TICKET)}</div>
+  <div style="font-size:12px;color:var(--muted)">Чистые деньги: ${fmt(state.money)} / 1 000 000 000 ₽</div><div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div>
+  <button class="btn-main" ${!inF||d.land||state.money<PRICE_LAND?'disabled':''} onclick="buyDream('land')">🍇 Купить участок</button>
+  <button class="btn-main" ${!d.land||d.ticket||state.money<PRICE_TICKET?'disabled':''} onclick="buyDream('ticket')">✈️ Купить билет в Италию</button>
+  ${d.won?'<div class="badge" style="color:var(--gold)">🏆 Вы уже строили винодельню! Можно пройти заново.</div>':''}</div>
+  <div class="box-card"><h3>♻️ Перерождение (♻️ ${state.rb.count})</h3>
+  <p style="font-size:12.5px;color:var(--muted)">Сброс денег, номеров, бизнесов, недвижимости и уровня. Навсегда остаются 💎, достижения, клан, друзья и 🌟 Звёзды: +15% к доходу за каждое перерождение и покупка улучшений.</p>
+  <div>Нужен капитал: <b>${fmt(rbNeed())}</b> (у вас ${fmt(nw)}) · Награда: <b style="color:var(--gold)">+${rbStars()} 🌟</b> · Звёзд: <b>${state.rb.stars}</b></div>
+  <button class="btn-main" id="rb-btn" ${nw<rbNeed()?'disabled':''} onclick="armRebirth()">♻️ Переродиться</button>
+  ${PERKS.map(([k,n,dsc,mx])=>`<button class="btn-sec" ${state.rb.upg[k]>=mx||state.rb.stars<state.rb.upg[k]+1?'disabled':''} onclick="buyPerk('${k}')">${n} ур. ${state.rb.upg[k]}/${mx} — ${dsc} (${state.rb.upg[k]+1} 🌟)</button>`).join('')}</div></div>`;
+  $('dream-root').innerHTML=h;}
+function buyDream(w){const d=state.dream,pr=w==='land'?PRICE_LAND:PRICE_TICKET;
+  if(state.money<pr||(w==='land'&&forbesRank()>10)||(w==='ticket'&&!d.land))return;
+  state.money-=pr;d[w]=true;playTone(260,'sine',.3,.35);
+  if(d.land&&d.ticket){d.won=true;$('win-overlay').style.display='flex';fullAd();}else showToast('🍇 Участок куплен! Теперь билет в Италию.');
+  renderDream();updateUI();saveGame();}
+function buyPerk(k){const u=state.rb.upg,mx=PERKS.find(x=>x[0]===k)[3];if(u[k]>=mx||state.rb.stars<u[k]+1)return;
+  state.rb.stars-=u[k]+1;u[k]++;renderDream();updateUI();saveGame();}
+let rbArm=0;
+function armRebirth(){
+  if(getNetWorth()<rbNeed())return;
+  if(Date.now()>rbArm){rbArm=Date.now()+4000;$('rb-btn').textContent='⚠️ Нажмите ещё раз для подтверждения';return;}
+  const st=rbStars();state.rb.count++;state.rb.stars+=st;
+  Object.assign(state,{money:3000+state.rb.upg.start*25000,dirtyMoney:0,xp:0,level:1,skillPoints:1,pendingRolledPlate:null,inventory:[],myAuctionListings:[],carsOwned:{},bizOwned:{},homesOwned:[],bz:{},launderJob:null,raidLog:[],
+    skills:{mreo_luck:0,haggle_master:0,tax_cut:0,nimble_hands:0,restorer:0,launder_pro:0}});
+  state.dream.land=false;state.dream.ticket=false;
+  generateAuctionLots();generateSecondhandMarket(true);showToast(`♻️ Перерождение #${state.rb.count}! +${st} 🌟 Звёзд`);fullAd();
+  renderDream();updateUI();saveGame();}
 
-    // Добавляем реальных игроков в список онлайн в профиле
-    ONLINE_PLAYERS.length = 0;
-    liveOnlinePlayers.forEach(p => ONLINE_PLAYERS.push(p));
+/* ---- Вкладки и интерфейс ---- */
+Object.assign(LOCATIONS_META,{bz:{title:'🛡️ Крыша и Рейды',desc:'Охрана, прокачка бизнеса, защита от синдикаты и ваши рейды'},dream:{title:'🍷 Мечта и Перерождение',desc:'Forbes, 1 000 000 000 ₽, винодельня в Италии и престиж'}});
+const nav=$('main-nav'),mainEl=document.querySelector('main');
+[['bz','🛡️ Крыша и Рейды'],['dream','🍷 Мечта и Перерождение']].forEach(([id,t])=>{
+  const b=document.createElement('button');b.textContent=t;b.setAttribute('onclick',`switchTab('${id}')`);nav.appendChild(b);
+  const s=document.createElement('section');s.id='tab-'+id;s.className='tab-section';s.innerHTML=`<div id="${id==='bz'?'bz-root':'dream-root'}"></div>`;mainEl.appendChild(s);});
+const _st=switchTab;
+switchTab=function(id){_st(id);
+  nav.querySelectorAll('button').forEach(b=>{const m=(b.getAttribute('onclick')||'').match(/switchTab\('(\w+)'\)/);b.classList.toggle('active',m&&m[1]===id);});
+  if(id==='bz')renderBz();if(id==='dream')renderDream();};
+['tab-inventory','tr-sub-hands','tab-auction'].forEach(id=>{const e=$(id);if(e)e.insertAdjacentHTML('afterbegin',filterBar());});
+$('donate-packs-grid').insertAdjacentHTML('beforebegin','<button class="btn-sec gem" style="margin-bottom:14px" onclick="watchAd()">📺 Смотреть рекламу: +3 💎</button>');
+document.body.insertAdjacentHTML('beforeend','<div id="win-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.9);align-items:center;justify-content:center;text-align:center;padding:20px"><div class="modal-box"><h2>🍷 ПОБЕДА!</h2><p>Вы вошли в Forbes, купили участок в Тоскане и билет в Италию. Ваша винодельня ждёт! Можно переродиться и пройти путь ещё раз быстрее.</p><button class="btn-main" onclick="this.closest(\'#win-overlay\').style.display=\'none\'">Продолжить игру</button></div></div>');
+updateUI();
 
-    // Добавляем реальных игроков в таблицу Forbes
-    liveOnlinePlayers.forEach(p => {
-      const existing = RIVAL_BOTS.find(b => b.id === p.id);
-      if (existing) {
-        existing.name = p.name;
-        existing.lvl = p.lvl;
-        existing.nw = p.nw;
-      } else {
-        RIVAL_BOTS.push({ name: p.name + ' (Онлайн)', id: p.id, lvl: p.lvl, nw: p.nw });
-      }
-    });
+</script>
+<script>
+/* ===== МОД 6.1 ===== */
+/* --- свои окна вместо alert/confirm/prompt --- */
+function modal(h){let m=$('gm');if(!m){m=document.createElement('div');m.id='gm';m.className='modal-backdrop';document.body.appendChild(m);}
+  m.innerHTML='<div class="modal-box">'+h+'</div>';m.classList.add('show');}
+function closeModal(){const m=$('gm');if(m)m.classList.remove('show');}
+function askModal(t,x,yes){modal(`<h3>${t}</h3><p style="font-size:13px;color:var(--muted)">${x}</p><div style="display:flex;gap:8px"><button class="btn-main" style="flex:1" id="gm-y">Да</button><button class="btn-sec" onclick="closeModal()">Отмена</button></div>`);
+  $('gm-y').onclick=()=>{closeModal();yes();};}
+function textModal(t,v,ok,ro){modal(`<h3>${t}</h3><textarea id="gm-t" ${ro?'readonly':''} rows="4" style="width:100%;background:var(--panel-2);color:#fff;border:1px solid var(--border);border-radius:9px;padding:9px;user-select:text">${v}</textarea><div style="display:flex;gap:8px"><button class="btn-main" style="flex:1" id="gm-y">${ro?'Копировать':'ОК'}</button><button class="btn-sec" onclick="closeModal()">Закрыть</button></div>`);
+  $('gm-y').onclick=()=>{const x=$('gm-t').value;if(ro){try{navigator.clipboard.writeText(x);showToast('Скопировано');}catch(e){$('gm-t').select();}}else{closeModal();ok(x);}};}
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+changeNickname=()=>textModal('Новый ник',state.nickname,v=>{v=v.trim().slice(0,18);if(v){state.nickname=v;renderProfileTab();updateUI();saveGame();}});
+exportSaveData=()=>textModal('Код сохранения',enc(state),null,true);
+importSaveData=()=>textModal('Вставьте код сохранения','',raw=>{try{const p=JSON.parse(decodeURIComponent(escape(atob(raw.trim()))));
+  if(p&&typeof p.money==='number'){Object.assign(state,p);saveGame();location.reload();}}catch(e){showToast('Ошибка импорта!');}});
+hardResetGame=()=>askModal('Сброс прогресса','Полностью сбросить прогресс? Это нельзя отменить.',()=>{
+  try{localStorage.removeItem('gosnomer_empire_v5');}catch(e){}
+  const go=()=>location.reload();yplayer?yplayer.setData({}).then(go,go):go();});
+generateShareTradeCode=()=>{const p=state.inventory.find(x=>x.uid===$('trade-plate-select').value);if(!p){showToast('Выберите номер!');return;}
+  textModal('Код обмена для друга',enc(p),null,true);};
+sendPlayerTradeOffer=function(){
+  const uid=$('trade-plate-select').value,p=state.inventory.find(x=>x.uid===uid),tid=$('trade-target-id').value.trim();
+  if(!p){showToast('Выберите номер для продажи!');return;}if(!tid){showToast('Укажите ID покупателя!');return;}
+  const pct=Math.min(getMaxMarkupForPlate(p),Math.max(-20,parseFloat($('trade-markup-slider').value)||0)),price=Math.round(p.price*(1+pct/100));
+  const sell=(pr,xp,msg)=>{for(const c in state.carsOwned)if(state.carsOwned[c].plateUid===uid)state.carsOwned[c].plateUid=null;
+    state.inventory.splice(state.inventory.findIndex(x=>x.uid===uid),1);state.money+=pr;state.tradesCompleted++;addXp(xp);playTone(240,'sine',.25,.3);
+    showToast(msg);renderTradeTab();updateUI();saveGame();};
+  if(Math.random()*100<calcSaleSuccessProbability(p,pct,state.friends.some(f=>f.id===tid)))sell(price,28,`✅ Сделка успешна! Покупатель ID:${tid} заплатил ${fmt(price)}`);
+  else{const cp=+Math.max(-10,pct*.45).toFixed(1),cpr=Math.round(p.price*(1+cp/100));playTone(90,'triangle',.2,.25);
+    askModal('Сделка сорвалась',`Покупатель ID:${tid} предлагает встречную цену ${fmt(cpr)} (${cp>=0?'+':''}${fmtPct(cp)}). Согласиться?`,()=>sell(cpr,18,`🤝 Продано по встречной цене: ${fmt(cpr)}`));}};
 
-    if (document.getElementById('tab-clan').classList.contains('active')) renderClanAndForbes();
-    if (document.getElementById('tab-profile').classList.contains('active')) renderProfileTab();
-  });
+/* --- реклама: пауза звука, GameplayAPI --- */
+let adMute=false;const _pt=playTone;playTone=(...a)=>{if(!adMute)_pt(...a);};
+fullAd=function(){try{ysdk&&ysdk.adv.showFullscreenAdv({callbacks:{onOpen(){adMute=true;},onClose(){adMute=false;},onError(){adMute=false;}}});}catch(e){adMute=false;}};
+watchAd=function(){if(!ysdk){showToast('Реклама доступна после публикации в Яндекс Играх');return;}
+  ysdk.adv.showRewardedVideo({callbacks:{onOpen(){adMute=true;},onRewarded(){state.gems+=3;showToast('📺 +3 💎 за просмотр!');updateUI();saveGame();},onClose(){adMute=false;},onError(){adMute=false;showToast('Реклама сейчас недоступна');}}});};
+const _gp=setInterval(()=>{if(ysdk){clearInterval(_gp);try{ysdk.features.GameplayAPI.start();}catch(e){}}},500);
 
-  // 4. Синхронизация общих лотов Аукциона от живых игроков
-  socket.on('shared_auction_sync', (serverLots) => {
-    serverLots.forEach(sLot => {
-      if (sLot.sellerId === state.playerId) return; // Свои лоты уже в верхнем блоке
-      const exists = auctionLots.some(l => l.plate && l.plate.uid === sLot.uid);
-      if (!exists) {
-        auctionLots.unshift({
-          plate: sLot.plate,
-          askPrice: sLot.askPrice,
-          minBid: sLot.minBid,
-          selectedBid: sLot.minBid,
-          seller: `🟢 ${sLot.sellerName} (ID:${sLot.sellerId})`,
-          isRealPlayerLot: true,
-          lotUid: sLot.uid
-        });
-      }
-    });
-    if (document.getElementById('tab-auction').classList.contains('active')) renderAuction();
-  });
+/* --- реалистичные номера в списках и витрина --- */
+function plateEl(p,sc=.6){
+  let m,r='';
+  if(p.country==='BY')m=`<span class="flag-icon flag-blr" style="margin-right:6px"></span><span class="dig" style="font-size:33px">${p.digits}${p.digits[0]}</span><span class="let">${p.l1}${p.l2}-${p.regionCode}</span>`;
+  else if(p.country==='KZ'){m=`<div class="kz-flag-left"><span class="flag-icon flag-kaz"></span>KZ</div><span class="dig" style="font-size:35px">${p.digits}</span><span class="let">${p.letters}</span>`;r=`<div class="plate-region-box"><div class="plate-region-num">${p.regionCode}</div></div>`;}
+  else{m=`<span class="let">${p.l1}</span><span class="dig">${p.digits}</span><span class="let">${p.l2}${p.l3}</span>`;r=`<div class="plate-region-box"><div class="plate-region-num">${p.regionCode}</div><div class="plate-country-row">RUS <span class="flag-icon flag-rus"></span></div></div>`;}
+  const st=STYLES.find(s=>s.id===p.style),d=document.createElement('div');d.style.cssText=`width:${350*sc}px;height:${82*sc}px;margin:2px 0`;
+  d.innerHTML=`<div class="plate-box ${p.isCrashed?'crashed':''} ${st?st.css:''}" style="width:350px;height:82px;transform:scale(${sc});transform-origin:0 0"><div class="plate-bolt bl"></div><div class="plate-bolt br"></div><div class="plate-scratches" style="opacity:${p.wear>.35?Math.min(.9,p.wear):0}"></div><div class="plate-main">${m}</div>${r}</div>`;
+  return d;}
+function upgradePlates(g,list){if(!g)return;[...g.children].forEach((c,i)=>{const m=c.querySelector('.mini-plate'),x=list[i]&&(list[i].plate||list[i]);if(m&&x)m.replaceWith(plateEl(x));});}
+bestUpdate=function(){state.inventory.concat(state.myAuctionListings.map(l=>l.plate)).forEach(p=>{
+  if(p.price>state.bestPlatePrice||(p.price===state.bestPlatePrice&&!state.bestObj)){state.bestPlatePrice=p.price;state.bestPlateStr=formatPlateString(p);state.bestObj=p;}});};
+const _rp3=renderProfileTab;renderProfileTab=function(){_rp3();const o=$('prof-showcase');if(o)o.remove();if(!state.bestObj)return;
+  const d=document.createElement('div');d.id='prof-showcase';d.className='showcase';d.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:6px">🏆 Витрина: самый дорогой номер</div>';
+  d.appendChild(plateEl(state.bestObj,.8));$('prof-detailed-stats').before(d);};
 
-  // Уведомление продавцу, когда его лот купил реальный игрок
-  socket.on('your_auction_lot_sold', ({ uid, plateStr, paidPrice, buyerName }) => {
-    const idx = state.myAuctionListings.findIndex(x => x.uid === uid);
-    if (idx !== -1) {
-      state.myAuctionListings.splice(idx, 1);
-      state.money += paidPrice;
-      state.auctionSoldCount++;
-      addXp(35);
-      showToast(`🎉 Игрок ${buyerName} купил ваш лот [${plateStr}] на аукционе за ${fmt(paidPrice)}!`);
-      renderAuction();
-      updateUI();
-      saveGame();
-    }
-  });
+/* --- группы вкладок --- */
+const GROUPS=[['🎰 Номера',['roller','inventory','cases','steal']],['🤝 Рынок',['trade','auction']],['🏭 Бизнес',['empire','bz','launder','skills']],['🍷 Мечта',['dream']],['👤 Профиль',['profile','clan','donate']]];
+const tabOfBtn=b=>((b.getAttribute('onclick')||'').match(/switchTab\('(\w+)'\)/)||[])[1],lastTab={};
+const gnav=document.createElement('nav');gnav.id='group-nav';nav.parentNode.insertBefore(gnav,nav);
+GROUPS.forEach((g,i)=>{const b=document.createElement('button');b.textContent=g[0];b.onclick=()=>switchTab(lastTab[i]||g[1][0]);gnav.appendChild(b);});
+const _st2=switchTab;
+switchTab=function(id){_st2(id);const gi=Math.max(0,GROUPS.findIndex(g=>g[1].includes(id)));lastTab[gi]=id;
+  [...gnav.children].forEach((b,i)=>b.classList.toggle('active',i===gi));
+  nav.querySelectorAll('button').forEach(b=>{b.style.display=GROUPS[gi][1].includes(tabOfBtn(b))?'':'none';});
+  nav.style.display=GROUPS[gi][1].length>1?'':'none';};
+switchTab('roller');
 
-  // Перехват выставления лота на аукцион, чтобы отправить его всем игрокам
-  const origConfirmAuction = window.confirmListPlateOnAuction;
-  window.confirmListPlateOnAuction = function() {
-    origConfirmAuction();
-    const latestLot = state.myAuctionListings[state.myAuctionListings.length - 1];
-    if (latestLot) {
-      socket.emit('auction_list_lot', {
-        uid: latestLot.uid,
-        plate: latestLot.plate,
-        plateStr: formatPlateString(latestLot.plate),
-        askPrice: latestLot.askPrice,
-        minBid: Math.round(latestLot.askPrice * 0.7),
-        sellerName: state.nickname,
-        sellerId: state.playerId
-      });
-    }
-  };
+/* --- ежедневный бонус и подвал --- */
+function dailyBonus(){const day=new Date().toISOString().slice(0,10),d=state.daily||(state.daily={last:'',streak:0});if(d.last===day)return;
+  d.streak=d.last===new Date(Date.now()-864e5).toISOString().slice(0,10)?d.streak+1:1;d.last=day;
+  const k=(d.streak-1)%7+1,money=Math.round(1500*k*(1+state.level*.2)),gems=k===7?10:k%3===0?2:0;
+  state.money+=money;state.gems+=gems;saveGame();updateUI();
+  modal(`<h2>🎁 Ежедневный бонус</h2><p>День серии: <b>${k}/7</b></p><div style="font-size:22px;font-weight:900;color:var(--green)">+${fmt(money)}${gems?` · +${gems} 💎`:''}</div><p style="font-size:12px;color:var(--muted)">Заходите каждый день: на 7-й день награда — 10 💎!</p><button class="btn-main" onclick="closeModal()">Забрать</button>`);}
+setTimeout(dailyBonus,2500);
+mainEl.insertAdjacentHTML('beforeend','<p class="foot">12+ · Все номера, имена и события в игре вымышлены, совпадения случайны. Игра не призывает к противоправным действиям.</p>');
 
-  // Перехват покупки лота на аукционе
-  const origBuyAuction = window.buyAuctionLot;
-  window.buyAuctionLot = function(idx) {
-    const lot = auctionLots[idx];
-    if (lot && lot.isRealPlayerLot && state.money >= lot.askPrice && state.inventory.length < getMaxInventory()) {
-      socket.emit('auction_buy_lot', {
-        lotUid: lot.lotUid,
-        buyerId: state.playerId,
-        buyerName: state.nickname,
-        paidPrice: lot.askPrice
-      });
-    }
-    origBuyAuction(idx);
-  };
-
-  // 5. Прямая P2P-торговля между реальными игроками по ID
-  const origSendTrade = window.sendPlayerTradeOffer;
-  window.sendPlayerTradeOffer = function() {
-    const targetId = document.getElementById('trade-target-id').value.trim();
-    const isRealOnline = liveOnlinePlayers.some(p => p.id === targetId);
-    if (isRealOnline) {
-      const uid = document.getElementById('trade-plate-select').value;
-      const p = state.inventory.find(x => x.uid === uid);
-      if (!p) return;
-      const pct = parseFloat(document.getElementById('trade-markup-slider').value) || 0;
-      const askPrice = Math.round(p.price * (1 + pct / 100));
-      socket.emit('p2p_trade_offer', {
-        targetId,
-        fromId: state.playerId,
-        fromName: state.nickname,
-        plate: p,
-        askPrice,
-        markupPct: pct
-      });
-      showToast(`📨 Предложение отправлено реальному игроку ID:${targetId}! Ожидайте его ответа.`);
-    } else {
-      origSendTrade();
-    }
-  };
-
-  // Получение живого P2P-предложения от другого игрока
-  socket.on('p2p_incoming_offer', ({ fromId, fromName, plate, askPrice, markupPct }) => {
-    const pStr = formatPlateString(plate);
-    if (confirm(`🤝 ВХОДЯЩАЯ СДЕЛКА ОТ ИГРОКА!\n\nИгрок ${fromName} (ID: ${fromId}) предлагает вам купить номер [${pStr}] за ${fmt(askPrice)} (Наценка: +${fmtPct(markupPct)}).\n\nКупить этот номер?`)) {
-      if (state.money < askPrice) {
-        showToast('❌ У вас недостаточно чистых денег для покупки!');
-        return;
-      }
-      state.money -= askPrice;
-      state.inventory.unshift(plate);
-      updateUI();
-      saveGame();
-      socket.emit('p2p_trade_accept', {
-        sellerId: fromId,
-        buyerId: state.playerId,
-        buyerName: state.nickname,
-        plate,
-        price: askPrice
-      });
-      showToast(`🎉 Вы купили номер [${pStr}] у игрока ${fromName}!`);
-    }
-  });
-
-  // Завершение сделки у продавца
-  socket.on('p2p_offer_accepted_by_buyer', ({ buyerName, plateUid, plateStr, price }) => {
-    const idx = state.inventory.findIndex(x => x.uid === plateUid);
-    if (idx !== -1) {
-      state.inventory.splice(idx, 1);
-      state.money += price;
-      state.tradesCompleted++;
-      addXp(35);
-      showToast(`💰 Игрок ${buyerName} принял ваше предложение и купил [${plateStr}] за ${fmt(price)}!`);
-      renderTradeTab();
-      updateUI();
-      saveGame();
-    }
-  });
-
-  // 6. Приглашение реального игрока в клан по ID
-  const origInviteClan = window.invitePlayerToClanById;
-  window.invitePlayerToClanById = function() {
-    const idVal = document.getElementById('clan-invite-id-inp')?.value.trim();
-    if (idVal && state.clan) {
-      socket.emit('clan_invite_send', {
-        targetId: idVal,
-        fromName: state.nickname,
-        clanTag: state.clan.tag,
-        clanName: state.clan.name
-      });
-    }
-    origInviteClan();
-  };
-
-  socket.on('clan_invite_received', ({ fromName, clanTag, clanName }) => {
-    if (confirm(`🛡️ Игрок ${fromName} приглашает вас вступить в клан [${clanTag}] ${clanName}!\nПринять приглашение?`)) {
-      state.clan = {
-        tag: clanTag,
-        name: clanName,
-        level: 1,
-        members: [{ id: state.playerId, name: state.nickname, role: 'Боец клана' }]
-      };
-      showToast(`🛡️ Вы вступили в клан [${clanTag}] ${clanName}!`);
-      updateUI();
-      saveGame();
-    }
-  });
-})();
 </script>
 </body>
 </html>
